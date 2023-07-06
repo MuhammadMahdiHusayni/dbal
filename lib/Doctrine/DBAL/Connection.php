@@ -22,7 +22,7 @@ namespace Doctrine\DBAL;
 use PDO;
 use Closure;
 use Exception;
-use Doctrine\DBAL\Driver\PDOStatement;
+// use Doctrine\DBAL\Driver\PDOStatement;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\Common\EventManager;
