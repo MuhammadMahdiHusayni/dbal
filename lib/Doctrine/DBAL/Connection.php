@@ -22,6 +22,7 @@ namespace Doctrine\DBAL;
 use PDO;
 use Closure;
 use Exception;
+use Doctrine\DBAL\Driver\PDOStatement;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\Common\EventManager;
@@ -639,7 +640,7 @@ class Connection implements DriverConnection
      *
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function prepare($statement)
+    public function prepare($statement, array $options = []): PDOStatement|false
     {
         $this->connect();
 

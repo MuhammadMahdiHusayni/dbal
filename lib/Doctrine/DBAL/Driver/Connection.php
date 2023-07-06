@@ -36,7 +36,7 @@ interface Connection
      *
      * @return \Doctrine\DBAL\Driver\Statement
      */
-    function prepare($prepareString);
+    function prepare($prepareString, $options);
 
     /**
      * Executes an SQL statement, returning a result set as a Statement object.
