@@ -51,7 +51,7 @@ interface ResultStatement extends \Traversable
      *
      * @return boolean
      */
-    public function setFetchMode($fetchMode, $arg2 = null, $arg3 = null);
+    public function setFetchMode(int $mode, mixed ...$args);
 
     /**
      * @see Query::HYDRATE_* constants
