@@ -130,10 +130,12 @@ class ArrayStatement implements \IteratorAggregate, ResultStatement
 
     /**
      * {@inheritdoc}
+     *
+     * @deprecated Use fetchAllNumeric(), fetchAllAssociative() or fetchFirstColumn() instead.
      */
-    public function fetchAll($fetchMode = null)
+    public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null)
     {
-        $rows = array();
+        $rows = [];
         while ($row = $this->fetch($fetchMode)) {
             $rows[] = $row;
         }
