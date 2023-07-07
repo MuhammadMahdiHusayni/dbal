@@ -44,7 +44,7 @@ interface Statement extends ResultStatement
      *
      * @return boolean TRUE on success or FALSE on failure.
      */
-    function bindValue($param, $value, $type = null);
+    function bindValue(string|int $param, mixed $value, int $type = PDO::PARAM_STR): bool;
 
     /**
      * Binds a PHP variable to a corresponding named or question mark placeholder in the
