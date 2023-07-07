@@ -57,12 +57,12 @@ class Schema extends AbstractAsset
     /**
      * @var \Doctrine\DBAL\Schema\Table[]
      */
-    protected $_tables = array();
+    protected $_tables = [];
 
     /**
      * @var \Doctrine\DBAL\Schema\Sequence[]
      */
-    protected $_sequences = array();
+    protected $_sequences = [];
 
     /**
      * @var \Doctrine\DBAL\Schema\SchemaConfig
@@ -72,9 +72,8 @@ class Schema extends AbstractAsset
     /**
      * @param \Doctrine\DBAL\Schema\Table[]      $tables
      * @param \Doctrine\DBAL\Schema\Sequence[]   $sequences
-     * @param \Doctrine\DBAL\Schema\SchemaConfig $schemaConfig
      */
-    public function __construct(array $tables=array(), array $sequences=array(), SchemaConfig $schemaConfig=null)
+    public function __construct(array $tables=[], array $sequences=[], SchemaConfig $schemaConfig=null)
     {
         if ($schemaConfig == null) {
             $schemaConfig = new SchemaConfig();
@@ -100,10 +99,8 @@ class Schema extends AbstractAsset
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\Table $table
      *
      * @return void
-     *
      * @throws \Doctrine\DBAL\Schema\SchemaException
      */
     protected function _addTable(Table $table)
@@ -118,10 +115,8 @@ class Schema extends AbstractAsset
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\Sequence $sequence
      *
      * @return void
-     *
      * @throws \Doctrine\DBAL\Schema\SchemaException
      */
     protected function _addSequence(Sequence $sequence)
@@ -170,7 +165,7 @@ class Schema extends AbstractAsset
         if ($this->isIdentifierQuoted($name)) {
             $name = $this->trimQuotes($name);
         }
-        if (strpos($name, ".") === false) {
+        if (!str_contains($name, ".")) {
             $name = $this->getName() . "." . $name;
         }
 
@@ -325,7 +320,6 @@ class Schema extends AbstractAsset
     /**
      * Returns an array of necessary SQL queries to create the schema on the given platform.
      *
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
      *
      * @return array
      */
@@ -340,7 +334,6 @@ class Schema extends AbstractAsset
     /**
      * Return an array of necessary SQL queries to drop the schema on the given platform.
      *
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
      *
      * @return array
      */
@@ -353,8 +346,6 @@ class Schema extends AbstractAsset
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\Schema              $toSchema
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
      *
      * @return array
      */
@@ -367,8 +358,6 @@ class Schema extends AbstractAsset
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\Schema              $fromSchema
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
      *
      * @return array
      */
@@ -381,8 +370,6 @@ class Schema extends AbstractAsset
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\Visitor\Visitor $visitor
-     *
      * @return void
      */
     public function visit(Visitor $visitor)

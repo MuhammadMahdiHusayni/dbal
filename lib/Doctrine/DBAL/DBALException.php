@@ -63,7 +63,6 @@ class DBALException extends \Exception
 
     /**
      * @param string $unknownDriverName
-     * @param array  $knownDrivers
      *
      * @return \Doctrine\DBAL\DBALException
      */
@@ -74,13 +73,11 @@ class DBALException extends \Exception
     }
 
     /**
-     * @param \Exception $driverEx
      * @param string     $sql
-     * @param array      $params
      *
      * @return \Doctrine\DBAL\DBALException
      */
-    public static function driverExceptionDuringQuery(\Exception $driverEx, $sql, array $params = array())
+    public static function driverExceptionDuringQuery(\Exception $driverEx, $sql, array $params = [])
     {
         $msg = "An exception occurred while executing '".$sql."'";
         if ($params) {
@@ -95,14 +92,13 @@ class DBALException extends \Exception
      * Returns a human-readable representation of an array of parameters.
      * This properly handles binary data by returning a hex representation.
      *
-     * @param array $params
      *
      * @return string
      */
     private static function formatParameters(array $params)
     {
         return '[' . implode(', ', array_map(function($param) {
-            $json = @json_encode($param);
+            $json = @json_encode($param, JSON_THROW_ON_ERROR);
 
             if (! is_string($json) || $json == 'null' && is_string($param)) {
                 // JSON encoding failed, this is not a UTF-8 string.

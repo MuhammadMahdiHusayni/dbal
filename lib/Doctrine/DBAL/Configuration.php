@@ -40,7 +40,7 @@ class Configuration
      *
      * @var array
      */
-    protected $_attributes = array();
+    protected $_attributes = [];
 
     /**
      * Sets the SQL logger to use. Defaults to NULL which means SQL logging is disabled.
@@ -61,8 +61,7 @@ class Configuration
      */
     public function getSQLLogger()
     {
-        return isset($this->_attributes['sqlLogger']) ?
-                $this->_attributes['sqlLogger'] : null;
+        return $this->_attributes['sqlLogger'] ?? null;
     }
 
     /**
@@ -72,14 +71,12 @@ class Configuration
      */
     public function getResultCacheImpl()
     {
-        return isset($this->_attributes['resultCacheImpl']) ?
-                $this->_attributes['resultCacheImpl'] : null;
+        return $this->_attributes['resultCacheImpl'] ?? null;
     }
 
     /**
      * Sets the cache driver implementation that is used for query result caching.
      *
-     * @param \Doctrine\Common\Cache\Cache $cacheImpl
      *
      * @return void
      */
@@ -111,10 +108,6 @@ class Configuration
      */
     public function getFilterSchemaAssetsExpression()
     {
-        if (isset($this->_attributes['filterSchemaAssetsExpression'])) {
-            return $this->_attributes['filterSchemaAssetsExpression'];
-        }
-
-        return null;
+        return $this->_attributes['filterSchemaAssetsExpression'] ?? null;
     }
 }

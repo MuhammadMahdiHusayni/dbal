@@ -33,25 +33,18 @@ use Doctrine\DBAL\Driver\Statement as DriverStatement;
 class Statement implements \IteratorAggregate, DriverStatement
 {
     /**
-     * The SQL statement.
-     *
-     * @var string
-     */
-    protected $sql;
-
-    /**
      * The bound parameters.
      *
      * @var array
      */
-    protected $params = array();
+    protected $params = [];
 
     /**
      * The parameter types.
      *
      * @var array
      */
-    protected $types = array();
+    protected $types = [];
 
     /**
      * The underlying driver statement.
@@ -80,9 +73,8 @@ class Statement implements \IteratorAggregate, DriverStatement
      * @param string                    $sql  The SQL of the statement.
      * @param \Doctrine\DBAL\Connection $conn The connection on which the statement should be executed.
      */
-    public function __construct($sql, Connection $conn)
+    public function __construct(protected $sql, Connection $conn)
     {
-        $this->sql = $sql;
         $this->stmt = $conn->getWrappedConnection()->prepare($sql);
         $this->conn = $conn;
         $this->platform = $conn->getDatabasePlatform();
@@ -173,8 +165,8 @@ class Statement implements \IteratorAggregate, DriverStatement
         if ($logger) {
             $logger->stopQuery();
         }
-        $this->params = array();
-        $this->types = array();
+        $this->params = [];
+        $this->types = [];
 
         return $stmt;
     }

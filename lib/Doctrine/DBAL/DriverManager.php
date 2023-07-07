@@ -30,26 +30,12 @@ use Doctrine\Common\EventManager;
 final class DriverManager
 {
     /**
-     * List of supported drivers and their mappings to the driver classes.
-     *
-     * To add your own driver use the 'driverClass' parameter to
-     * {@link DriverManager::getConnection()}.
-     *
-     * @var array
-     */
-     private static $_driverMap = array(
-            'pdo_mysql'  => 'Doctrine\DBAL\Driver\PDOMySql\Driver',
-            'pdo_sqlite' => 'Doctrine\DBAL\Driver\PDOSqlite\Driver',
-            'pdo_pgsql'  => 'Doctrine\DBAL\Driver\PDOPgSql\Driver',
-            'pdo_oci' => 'Doctrine\DBAL\Driver\PDOOracle\Driver',
-            'oci8' => 'Doctrine\DBAL\Driver\OCI8\Driver',
-            'ibm_db2' => 'Doctrine\DBAL\Driver\IBMDB2\DB2Driver',
-            'pdo_ibm' => 'Doctrine\DBAL\Driver\PDOIbm\Driver',
-            'pdo_sqlsrv' => 'Doctrine\DBAL\Driver\PDOSqlsrv\Driver',
-            'mysqli' => 'Doctrine\DBAL\Driver\Mysqli\Driver',
-            'drizzle_pdo_mysql'  => 'Doctrine\DBAL\Driver\DrizzlePDOMySql\Driver',
-            'sqlsrv' => 'Doctrine\DBAL\Driver\SQLSrv\Driver',
-            );
+      * List of supported drivers and their mappings to the driver classes.
+      *
+      * To add your own driver use the 'driverClass' parameter to
+      * {@link DriverManager::getConnection()}.
+      */
+     private static array $_driverMap = ['pdo_mysql'  => \Doctrine\DBAL\Driver\PDOMySql\Driver::class, 'pdo_sqlite' => \Doctrine\DBAL\Driver\PDOSqlite\Driver::class, 'pdo_pgsql'  => \Doctrine\DBAL\Driver\PDOPgSql\Driver::class, 'pdo_oci' => \Doctrine\DBAL\Driver\PDOOracle\Driver::class, 'oci8' => \Doctrine\DBAL\Driver\OCI8\Driver::class, 'ibm_db2' => \Doctrine\DBAL\Driver\IBMDB2\DB2Driver::class, 'pdo_ibm' => \Doctrine\DBAL\Driver\PDOIbm\Driver::class, 'pdo_sqlsrv' => \Doctrine\DBAL\Driver\PDOSqlsrv\Driver::class, 'mysqli' => \Doctrine\DBAL\Driver\Mysqli\Driver::class, 'drizzle_pdo_mysql'  => \Doctrine\DBAL\Driver\DrizzlePDOMySql\Driver::class, 'sqlsrv' => \Doctrine\DBAL\Driver\SQLSrv\Driver::class];
 
     /**
      * Private constructor. This class cannot be instantiated.
@@ -143,7 +129,7 @@ final class DriverManager
 
         $driver = new $className();
 
-        $wrapperClass = 'Doctrine\DBAL\Connection';
+        $wrapperClass = \Doctrine\DBAL\Connection::class;
         if (isset($params['wrapperClass'])) {
             if (is_subclass_of($params['wrapperClass'], $wrapperClass)) {
                $wrapperClass = $params['wrapperClass'];
@@ -180,7 +166,7 @@ final class DriverManager
             throw DBALException::unknownDriver($params['driver'], array_keys(self::$_driverMap));
         }
 
-        if (isset($params['driverClass']) && ! in_array('Doctrine\DBAL\Driver', class_implements($params['driverClass'], true))) {
+        if (isset($params['driverClass']) && ! in_array(\Doctrine\DBAL\Driver::class, class_implements($params['driverClass'], true))) {
             throw DBALException::invalidDriverClass($params['driverClass']);
         }
     }

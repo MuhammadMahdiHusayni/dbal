@@ -29,22 +29,13 @@ use Doctrine\DBAL\Schema\Index;
 
 class ReservedKeywordsValidator implements Visitor
 {
-    /**
-     * @var KeywordList[]
-     */
-    private $keywordLists = array();
-
-    /**
-     * @var array
-     */
-    private $violations = array();
+    private array $violations = [];
 
     /**
      * @param \Doctrine\DBAL\Platforms\Keywords\KeywordList[] $keywordLists
      */
-    public function __construct(array $keywordLists)
+    public function __construct(private readonly array $keywordLists)
     {
-        $this->keywordLists = $keywordLists;
     }
 
     /**
@@ -66,7 +57,7 @@ class ReservedKeywordsValidator implements Visitor
             $word = str_replace('`', '', $word);
         }
 
-        $keywordLists = array();
+        $keywordLists = [];
         foreach ($this->keywordLists as $keywordList) {
             if ($keywordList->isKeyword($word)) {
                 $keywordLists[] = $keywordList->getName();

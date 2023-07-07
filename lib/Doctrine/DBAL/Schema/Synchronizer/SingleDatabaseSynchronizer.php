@@ -31,10 +31,7 @@ use Doctrine\DBAL\Schema\Visitor\DropSchemaSqlCollector;
  */
 class SingleDatabaseSynchronizer extends AbstractSchemaSynchronizer
 {
-    /**
-     * @var \Doctrine\DBAL\Platforms\AbstractPlatform
-     */
-    private $platform;
+    private readonly \Doctrine\DBAL\Platforms\AbstractPlatform $platform;
 
     /**
      * @param \Doctrine\DBAL\Connection $conn

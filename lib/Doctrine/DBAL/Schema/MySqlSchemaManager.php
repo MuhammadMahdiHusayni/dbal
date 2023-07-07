@@ -51,10 +51,7 @@ class MySqlSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableUserDefinition($user)
     {
-        return array(
-            'user' => $user['User'],
-            'password' => $user['Password'],
-        );
+        return ['user' => $user['User'], 'password' => $user['Password']];
     }
 
     /**
@@ -69,8 +66,8 @@ class MySqlSchemaManager extends AbstractSchemaManager
             } else {
                 $v['primary'] = false;
             }
-            if (strpos($v['index_type'], 'FULLTEXT') !== false) {
-                $v['flags'] = array('FULLTEXT');
+            if (str_contains((string) $v['index_type'], 'FULLTEXT')) {
+                $v['flags'] = ['FULLTEXT'];
             }
             $tableIndexes[$k] = $v;
         }
@@ -101,7 +98,7 @@ class MySqlSchemaManager extends AbstractSchemaManager
     {
         $tableColumn = array_change_key_case($tableColumn, CASE_LOWER);
 
-        $dbType = strtolower($tableColumn['type']);
+        $dbType = strtolower((string) $tableColumn['type']);
         $dbType = strtok($dbType, '(), ');
         if (isset($tableColumn['length'])) {
             $length = $tableColumn['length'];
@@ -135,7 +132,7 @@ class MySqlSchemaManager extends AbstractSchemaManager
             case 'real':
             case 'numeric':
             case 'decimal':
-                if(preg_match('([A-Za-z]+\(([0-9]+)\,([0-9]+)\))', $tableColumn['type'], $match)) {
+                if(preg_match('([A-Za-z]+\(([0-9]+)\,([0-9]+)\))', (string) $tableColumn['type'], $match)) {
                     $precision = $match[1];
                     $scale = $match[2];
                     $length = null;
@@ -158,17 +155,7 @@ class MySqlSchemaManager extends AbstractSchemaManager
 
         $length = ((int) $length == 0) ? null : (int) $length;
 
-        $options = array(
-            'length'        => $length,
-            'unsigned'      => (bool) (strpos($tableColumn['type'], 'unsigned') !== false),
-            'fixed'         => (bool) $fixed,
-            'default'       => isset($tableColumn['default']) ? $tableColumn['default'] : null,
-            'notnull'       => (bool) ($tableColumn['null'] != 'YES'),
-            'scale'         => null,
-            'precision'     => null,
-            'autoincrement' => (bool) (strpos($tableColumn['extra'], 'auto_increment') !== false),
-            'comment'       => (isset($tableColumn['comment'])) ? $tableColumn['comment'] : null
-        );
+        $options = ['length'        => $length, 'unsigned'      => (bool) (str_contains((string) $tableColumn['type'], 'unsigned')), 'fixed'         => (bool) $fixed, 'default'       => $tableColumn['default'] ?? null, 'notnull'       => (bool) ($tableColumn['null'] != 'YES'), 'scale'         => null, 'precision'     => null, 'autoincrement' => (bool) (str_contains((string) $tableColumn['extra'], 'auto_increment')), 'comment'       => $tableColumn['comment'] ?? null];
 
         if ($scale !== null && $precision !== null) {
             $options['scale'] = $scale;
@@ -183,7 +170,7 @@ class MySqlSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableTableForeignKeysList($tableForeignKeys)
     {
-        $list = array();
+        $list = [];
         foreach ($tableForeignKeys as $value) {
             $value = array_change_key_case($value, CASE_LOWER);
             if (!isset($list[$value['constraint_name']])) {
@@ -194,28 +181,18 @@ class MySqlSchemaManager extends AbstractSchemaManager
                     $value['update_rule'] = null;
                 }
 
-                $list[$value['constraint_name']] = array(
-                    'name' => $value['constraint_name'],
-                    'local' => array(),
-                    'foreign' => array(),
-                    'foreignTable' => $value['referenced_table_name'],
-                    'onDelete' => $value['delete_rule'],
-                    'onUpdate' => $value['update_rule'],
-                );
+                $list[$value['constraint_name']] = ['name' => $value['constraint_name'], 'local' => [], 'foreign' => [], 'foreignTable' => $value['referenced_table_name'], 'onDelete' => $value['delete_rule'], 'onUpdate' => $value['update_rule']];
             }
             $list[$value['constraint_name']]['local'][] = $value['column_name'];
             $list[$value['constraint_name']]['foreign'][] = $value['referenced_column_name'];
         }
 
-        $result = array();
+        $result = [];
         foreach($list as $constraint) {
             $result[] = new ForeignKeyConstraint(
                 array_values($constraint['local']), $constraint['foreignTable'],
                 array_values($constraint['foreign']), $constraint['name'],
-                array(
-                    'onDelete' => $constraint['onDelete'],
-                    'onUpdate' => $constraint['onUpdate'],
-                )
+                ['onDelete' => $constraint['onDelete'], 'onUpdate' => $constraint['onUpdate']]
             );
         }
 

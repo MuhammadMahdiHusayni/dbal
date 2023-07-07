@@ -29,18 +29,12 @@ namespace Doctrine\DBAL\Schema;
 class View extends AbstractAsset
 {
     /**
-     * @var string
-     */
-    private $_sql;
-
-    /**
      * @param string $name
-     * @param string $sql
+     * @param string $_sql
      */
-    public function __construct($name, $sql)
+    public function __construct($name, private $_sql)
     {
         $this->_setName($name);
-        $this->_sql = $sql;
     }
 
     /**

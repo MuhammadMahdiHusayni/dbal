@@ -32,43 +32,13 @@ use Doctrine\DBAL\Schema\TableDiff;
  */
 class SchemaAlterTableRenameColumnEventArgs extends SchemaEventArgs
 {
-    /**
-     * @var string
-     */
-    private $_oldColumnName;
+    private array $_sql = [];
 
     /**
-     * @var \Doctrine\DBAL\Schema\Column
+     * @param string $_oldColumnName
      */
-    private $_column;
-
-    /**
-     * @var \Doctrine\DBAL\Schema\TableDiff
-     */
-    private $_tableDiff;
-
-    /**
-     * @var \Doctrine\DBAL\Platforms\AbstractPlatform
-     */
-    private $_platform;
-
-    /**
-     * @var array
-     */
-    private $_sql = array();
-
-    /**
-     * @param string                                    $oldColumnName
-     * @param \Doctrine\DBAL\Schema\Column              $column
-     * @param \Doctrine\DBAL\Schema\TableDiff           $tableDiff
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
-     */
-    public function __construct($oldColumnName, Column $column, TableDiff $tableDiff, AbstractPlatform $platform)
+    public function __construct(private $_oldColumnName, private readonly Column $_column, private readonly TableDiff $_tableDiff, private readonly AbstractPlatform $_platform)
     {
-        $this->_oldColumnName = $oldColumnName;
-        $this->_column        = $column;
-        $this->_tableDiff     = $tableDiff;
-        $this->_platform      = $platform;
     }
 
     /**

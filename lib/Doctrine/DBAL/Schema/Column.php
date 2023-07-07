@@ -79,7 +79,7 @@ class Column extends AbstractAsset
     /**
      * @var array
      */
-    protected $_platformOptions = array();
+    protected $_platformOptions = [];
 
     /**
      * @var string|null
@@ -94,16 +94,14 @@ class Column extends AbstractAsset
     /**
      * @var array
      */
-    protected $_customSchemaOptions = array();
+    protected $_customSchemaOptions = [];
 
     /**
      * Creates a new Column.
      *
      * @param string                    $columnName
-     * @param \Doctrine\DBAL\Types\Type $type
-     * @param array                     $options
      */
-    public function __construct($columnName, Type $type, array $options=array())
+    public function __construct($columnName, Type $type, array $options=[])
     {
         $this->_setName($columnName);
         $this->setType($type);
@@ -111,8 +109,6 @@ class Column extends AbstractAsset
     }
 
     /**
-     * @param array $options
-     *
      * @return \Doctrine\DBAL\Schema\Column
      */
     public function setOptions(array $options)
@@ -128,8 +124,6 @@ class Column extends AbstractAsset
     }
 
     /**
-     * @param \Doctrine\DBAL\Types\Type $type
-     *
      * @return \Doctrine\DBAL\Schema\Column
      */
     public function setType(Type $type)
@@ -223,11 +217,9 @@ class Column extends AbstractAsset
     }
 
     /**
-     * @param mixed $default
-     *
      * @return \Doctrine\DBAL\Schema\Column
      */
-    public function setDefault($default)
+    public function setDefault(mixed $default)
     {
         $this->_default = $default;
 
@@ -235,8 +227,6 @@ class Column extends AbstractAsset
     }
 
     /**
-     * @param array $platformOptions
-     *
      * @return \Doctrine\DBAL\Schema\Column
      */
     public function setPlatformOptions(array $platformOptions)
@@ -248,11 +238,10 @@ class Column extends AbstractAsset
 
     /**
      * @param string $name
-     * @param mixed  $value
      *
      * @return \Doctrine\DBAL\Schema\Column
      */
-    public function setPlatformOption($name, $value)
+    public function setPlatformOption($name, mixed $value)
     {
         $this->_platformOptions[$name] = $value;
 
@@ -412,11 +401,10 @@ class Column extends AbstractAsset
 
     /**
      * @param string $name
-     * @param mixed  $value
      *
      * @return \Doctrine\DBAL\Schema\Column
      */
-    public function setCustomSchemaOption($name, $value)
+    public function setCustomSchemaOption($name, mixed $value)
     {
         $this->_customSchemaOptions[$name] = $value;
 
@@ -444,8 +432,6 @@ class Column extends AbstractAsset
     }
 
     /**
-     * @param array $customSchemaOptions
-     *
      * @return \Doctrine\DBAL\Schema\Column
      */
     public function setCustomSchemaOptions(array $customSchemaOptions)
@@ -463,9 +449,6 @@ class Column extends AbstractAsset
         return $this->_customSchemaOptions;
     }
 
-    /**
-     * @param \Doctrine\DBAL\Schema\Visitor\Visitor $visitor
-     */
     public function visit(Visitor $visitor)
     {
         $visitor->accept($this);
@@ -476,19 +459,6 @@ class Column extends AbstractAsset
      */
     public function toArray()
     {
-        return array_merge(array(
-            'name'          => $this->_name,
-            'type'          => $this->_type,
-            'default'       => $this->_default,
-            'notnull'       => $this->_notnull,
-            'length'        => $this->_length,
-            'precision'     => $this->_precision,
-            'scale'         => $this->_scale,
-            'fixed'         => $this->_fixed,
-            'unsigned'      => $this->_unsigned,
-            'autoincrement' => $this->_autoincrement,
-            'columnDefinition' => $this->_columnDefinition,
-            'comment' => $this->_comment,
-        ), $this->_platformOptions, $this->_customSchemaOptions);
+        return array_merge(['name'          => $this->_name, 'type'          => $this->_type, 'default'       => $this->_default, 'notnull'       => $this->_notnull, 'length'        => $this->_length, 'precision'     => $this->_precision, 'scale'         => $this->_scale, 'fixed'         => $this->_fixed, 'unsigned'      => $this->_unsigned, 'autoincrement' => $this->_autoincrement, 'columnDefinition' => $this->_columnDefinition, 'comment' => $this->_comment], $this->_platformOptions, $this->_customSchemaOptions);
     }
 }

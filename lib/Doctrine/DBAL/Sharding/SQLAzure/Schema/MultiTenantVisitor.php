@@ -50,38 +50,20 @@ use Doctrine\DBAL\Schema\Index;
  */
 class MultiTenantVisitor implements Visitor
 {
-    /**
-     * @var array
-     */
-    private $excludedTables = array();
-
-    /**
-     * @var string
-     */
-    private $tenantColumnName;
-
-    /**
-     * @var string
-     */
-    private $tenantColumnType = 'integer';
+    private string $tenantColumnType = 'integer';
 
     /**
      * Name of the federation distribution, defaulting to the tenantColumnName
      * if not specified.
-     *
-     * @var string
      */
-    private $distributionName;
+    private readonly string $distributionName;
 
     /**
-     * @param array       $excludedTables
      * @param string      $tenantColumnName
      * @param string|null $distributionName
      */
-    public function __construct(array $excludedTables = array(), $tenantColumnName = 'tenant_id', $distributionName = null)
+    public function __construct(private readonly array $excludedTables = [], private $tenantColumnName = 'tenant_id', $distributionName = null)
     {
-        $this->excludedTables = $excludedTables;
-        $this->tenantColumnName = $tenantColumnName;
         $this->distributionName = $distributionName ?: $tenantColumnName;
     }
 
@@ -94,9 +76,7 @@ class MultiTenantVisitor implements Visitor
             return;
         }
 
-        $table->addColumn($this->tenantColumnName, $this->tenantColumnType, array(
-            'default' => "federation_filtering_value('". $this->distributionName ."')",
-        ));
+        $table->addColumn($this->tenantColumnName, $this->tenantColumnType, ['default' => "federation_filtering_value('". $this->distributionName ."')"]);
 
         $clusteredIndex = $this->getClusteredIndex($table);
 

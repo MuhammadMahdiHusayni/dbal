@@ -28,7 +28,7 @@ class DB2Platform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getBlobTypeDeclarationSQL(array $field)
+    public function getBlobTypeDeclarationSQL(array $field): never
     {
         throw DBALException::notSupported(__METHOD__);
     }
@@ -38,20 +38,7 @@ class DB2Platform extends AbstractPlatform
      */
     public function initializeDoctrineTypeMappings()
     {
-        $this->doctrineTypeMapping = array(
-            'smallint'      => 'smallint',
-            'bigint'        => 'bigint',
-            'integer'       => 'integer',
-            'time'          => 'time',
-            'date'          => 'date',
-            'varchar'       => 'string',
-            'character'     => 'string',
-            'clob'          => 'text',
-            'decimal'       => 'decimal',
-            'double'        => 'float',
-            'real'          => 'float',
-            'timestamp'     => 'datetime',
-        );
+        $this->doctrineTypeMapping = ['smallint'      => 'smallint', 'bigint'        => 'bigint', 'integer'       => 'integer', 'time'          => 'time', 'date'          => 'date', 'varchar'       => 'string', 'character'     => 'string', 'clob'          => 'text', 'decimal'       => 'decimal', 'double'        => 'float', 'real'          => 'float', 'timestamp'     => 'datetime'];
     }
 
     /**
@@ -156,7 +143,7 @@ class DB2Platform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getListDatabasesSQL()
+    public function getListDatabasesSQL(): never
     {
         throw DBALException::notSupported(__METHOD__);
     }
@@ -164,7 +151,7 @@ class DB2Platform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getListSequencesSQL($database)
+    public function getListSequencesSQL($database): never
     {
         throw DBALException::notSupported(__METHOD__);
     }
@@ -172,7 +159,7 @@ class DB2Platform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getListTableConstraintsSQL($table)
+    public function getListTableConstraintsSQL($table): never
     {
         throw DBALException::notSupported(__METHOD__);
     }
@@ -214,7 +201,7 @@ class DB2Platform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getListUsersSQL()
+    public function getListUsersSQL(): never
     {
         throw DBALException::notSupported(__METHOD__);
     }
@@ -263,7 +250,7 @@ class DB2Platform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDropSequenceSQL($sequence)
+    public function getDropSequenceSQL($sequence): never
     {
         throw DBALException::notSupported(__METHOD__);
     }
@@ -271,7 +258,7 @@ class DB2Platform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getSequenceNextValSQL($sequenceName)
+    public function getSequenceNextValSQL($sequenceName): never
     {
         throw DBALException::notSupported(__METHOD__);
     }
@@ -343,13 +330,13 @@ class DB2Platform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function _getCreateTableSQL($tableName, array $columns, array $options = array())
+    protected function _getCreateTableSQL($tableName, array $columns, array $options = [])
     {
-        $indexes = array();
+        $indexes = [];
         if (isset($options['indexes'])) {
             $indexes = $options['indexes'];
         }
-        $options['indexes'] = array();
+        $options['indexes'] = [];
 
         $sqls = parent::_getCreateTableSQL($tableName, $columns, $options);
 
@@ -364,10 +351,10 @@ class DB2Platform extends AbstractPlatform
      */
     public function getAlterTableSQL(TableDiff $diff)
     {
-        $sql = array();
-        $columnSql = array();
+        $sql = [];
+        $columnSql = [];
 
-        $queryParts = array();
+        $queryParts = [];
         foreach ($diff->addedColumns as $column) {
             if ($this->onSchemaAlterTableAddColumn($column, $diff, $columnSql)) {
                 continue;
@@ -403,7 +390,7 @@ class DB2Platform extends AbstractPlatform
             $queryParts[] =  'RENAME ' . $oldColumnName . ' TO ' . $column->getQuotedName($this);
         }
 
-        $tableSql = array();
+        $tableSql = [];
 
         if ( ! $this->onSchemaAlterTable($diff, $tableSql)) {
             if (count($queryParts) > 0) {
@@ -426,7 +413,7 @@ class DB2Platform extends AbstractPlatform
     public function getDefaultValueDeclarationSQL($field)
     {
         if (isset($field['notnull']) && $field['notnull'] && !isset($field['default'])) {
-            if (in_array((string)$field['type'], array("Integer", "BigInteger", "SmallInteger"))) {
+            if (in_array((string)$field['type'], ["Integer", "BigInteger", "SmallInteger"])) {
                 $field['default'] = 0;
             } else if((string)$field['type'] == "DateTime") {
                 $field['default'] = "00-00-00 00:00:00";
@@ -575,6 +562,6 @@ class DB2Platform extends AbstractPlatform
      */
     protected function getReservedKeywordsClass()
     {
-        return 'Doctrine\DBAL\Platforms\Keywords\DB2Keywords';
+        return \Doctrine\DBAL\Platforms\Keywords\DB2Keywords::class;
     }
 }

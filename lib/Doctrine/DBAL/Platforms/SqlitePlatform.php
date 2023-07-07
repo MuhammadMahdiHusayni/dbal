@@ -62,15 +62,11 @@ class SqlitePlatform extends AbstractPlatform
      */
     public function getNowExpression($type = 'timestamp')
     {
-        switch ($type) {
-            case 'time':
-                return 'time(\'now\')';
-            case 'date':
-                return 'date(\'now\')';
-            case 'timestamp':
-            default:
-                return 'datetime(\'now\')';
-        }
+        return match ($type) {
+            'time' => 'time(\'now\')',
+            'date' => 'date(\'now\')',
+            default => 'datetime(\'now\')',
+        };
     }
 
     /**
@@ -80,18 +76,11 @@ class SqlitePlatform extends AbstractPlatform
     {
         $trimChar = ($char != false) ? (', ' . $char) : '';
 
-        switch ($pos) {
-            case self::TRIM_LEADING:
-                $trimFn = 'LTRIM';
-                break;
-
-            case self::TRIM_TRAILING:
-                $trimFn = 'RTRIM';
-                break;
-
-            default:
-                $trimFn = 'TRIM';
-        }
+        $trimFn = match ($pos) {
+            self::TRIM_LEADING => 'LTRIM',
+            self::TRIM_TRAILING => 'RTRIM',
+            default => 'TRIM',
+        };
 
         return $trimFn . '(' . $str . $trimChar . ')';
     }
@@ -167,16 +156,11 @@ class SqlitePlatform extends AbstractPlatform
      */
     protected function _getTransactionIsolationLevelSQL($level)
     {
-        switch ($level) {
-            case \Doctrine\DBAL\Connection::TRANSACTION_READ_UNCOMMITTED:
-                return 0;
-            case \Doctrine\DBAL\Connection::TRANSACTION_READ_COMMITTED:
-            case \Doctrine\DBAL\Connection::TRANSACTION_REPEATABLE_READ:
-            case \Doctrine\DBAL\Connection::TRANSACTION_SERIALIZABLE:
-                return 1;
-            default:
-                return parent::_getTransactionIsolationLevelSQL($level);
-        }
+        return match ($level) {
+            \Doctrine\DBAL\Connection::TRANSACTION_READ_UNCOMMITTED => 0,
+            \Doctrine\DBAL\Connection::TRANSACTION_READ_COMMITTED, \Doctrine\DBAL\Connection::TRANSACTION_REPEATABLE_READ, \Doctrine\DBAL\Connection::TRANSACTION_SERIALIZABLE => 1,
+            default => parent::_getTransactionIsolationLevelSQL($level),
+        };
     }
 
     /**
@@ -292,8 +276,9 @@ class SqlitePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function _getCreateTableSQL($name, array $columns, array $options = array())
+    protected function _getCreateTableSQL($name, array $columns, array $options = [])
     {
+        $query = [];
         $name = str_replace('.', '__', $name);
         $queryFields = $this->getColumnDeclarationListSQL($columns);
 
@@ -510,40 +495,7 @@ class SqlitePlatform extends AbstractPlatform
      */
     protected function initializeDoctrineTypeMappings()
     {
-        $this->doctrineTypeMapping = array(
-            'boolean'          => 'boolean',
-            'tinyint'          => 'boolean',
-            'smallint'         => 'smallint',
-            'mediumint'        => 'integer',
-            'int'              => 'integer',
-            'integer'          => 'integer',
-            'serial'           => 'integer',
-            'bigint'           => 'bigint',
-            'bigserial'        => 'bigint',
-            'clob'             => 'text',
-            'tinytext'         => 'text',
-            'mediumtext'       => 'text',
-            'longtext'         => 'text',
-            'text'             => 'text',
-            'varchar'          => 'string',
-            'longvarchar'      => 'string',
-            'varchar2'         => 'string',
-            'nvarchar'         => 'string',
-            'image'            => 'string',
-            'ntext'            => 'string',
-            'char'             => 'string',
-            'date'             => 'date',
-            'datetime'         => 'datetime',
-            'timestamp'        => 'datetime',
-            'time'             => 'time',
-            'float'            => 'float',
-            'double'           => 'float',
-            'double precision' => 'float',
-            'real'             => 'float',
-            'decimal'          => 'decimal',
-            'numeric'          => 'decimal',
-            'blob'             => 'blob',
-        );
+        $this->doctrineTypeMapping = ['boolean'          => 'boolean', 'tinyint'          => 'boolean', 'smallint'         => 'smallint', 'mediumint'        => 'integer', 'int'              => 'integer', 'integer'          => 'integer', 'serial'           => 'integer', 'bigint'           => 'bigint', 'bigserial'        => 'bigint', 'clob'             => 'text', 'tinytext'         => 'text', 'mediumtext'       => 'text', 'longtext'         => 'text', 'text'             => 'text', 'varchar'          => 'string', 'longvarchar'      => 'string', 'varchar2'         => 'string', 'nvarchar'         => 'string', 'image'            => 'string', 'ntext'            => 'string', 'char'             => 'string', 'date'             => 'date', 'datetime'         => 'datetime', 'timestamp'        => 'datetime', 'time'             => 'time', 'float'            => 'float', 'double'           => 'float', 'double precision' => 'float', 'real'             => 'float', 'decimal'          => 'decimal', 'numeric'          => 'decimal', 'blob'             => 'blob'];
     }
 
     /**
@@ -551,7 +503,7 @@ class SqlitePlatform extends AbstractPlatform
      */
     protected function getReservedKeywordsClass()
     {
-        return 'Doctrine\DBAL\Platforms\Keywords\SQLiteKeywords';
+        return \Doctrine\DBAL\Platforms\Keywords\SQLiteKeywords::class;
     }
 
     /**
@@ -563,7 +515,7 @@ class SqlitePlatform extends AbstractPlatform
             throw new DBALException('Sqlite platform requires for alter table the table diff with reference to original table schema');
         }
 
-        $sql = array();
+        $sql = [];
         foreach ($diff->fromTable->getIndexes() as $index) {
             if ( ! $index->isPrimary()) {
                 $sql[] = $this->getDropIndexSQL($index, $diff->name);
@@ -582,7 +534,7 @@ class SqlitePlatform extends AbstractPlatform
             throw new DBALException('Sqlite platform requires for alter table the table diff with reference to original table schema');
         }
 
-        $sql = array();
+        $sql = [];
         $tableName = $diff->newName ?: $diff->name;
         foreach ($this->getIndexesInAlteredTable($diff) as $index) {
             if ($index->isPrimary()) {
@@ -650,7 +602,7 @@ class SqlitePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCreatePrimaryKeySQL(Index $index, $table)
+    public function getCreatePrimaryKeySQL(Index $index, $table): never
     {
         throw new DBALException('Sqlite platform does not support alter primary key.');
     }
@@ -658,7 +610,7 @@ class SqlitePlatform extends AbstractPlatform
     /**
      * {@inheritdoc}
      */
-    public function getCreateForeignKeySQL(ForeignKeyConstraint $foreignKey, $table)
+    public function getCreateForeignKeySQL(ForeignKeyConstraint $foreignKey, $table): never
     {
         throw new DBALException('Sqlite platform does not support alter foreign key.');
     }
@@ -666,7 +618,7 @@ class SqlitePlatform extends AbstractPlatform
     /**
      * {@inheritdoc}
      */
-    public function getDropForeignKeySQL($foreignKey, $table)
+    public function getDropForeignKeySQL($foreignKey, $table): never
     {
         throw new DBALException('Sqlite platform does not support alter foreign key.');
     }
@@ -674,7 +626,7 @@ class SqlitePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCreateConstraintSQL(Constraint $constraint, $table)
+    public function getCreateConstraintSQL(Constraint $constraint, $table): never
     {
         throw new DBALException('Sqlite platform does not support alter constraint.');
     }
@@ -684,7 +636,7 @@ class SqlitePlatform extends AbstractPlatform
      */
     public function getCreateTableSQL(Table $table, $createFlags = null)
     {
-        $createFlags = null === $createFlags ? self::CREATE_INDEXES | self::CREATE_FOREIGNKEYS : $createFlags;
+        $createFlags ??= self::CREATE_INDEXES | self::CREATE_FOREIGNKEYS;
 
         return parent::getCreateTableSQL($table, $createFlags);
     }
@@ -716,10 +668,10 @@ class SqlitePlatform extends AbstractPlatform
 
         $table = clone $fromTable;
 
-        $columns = array();
-        $oldColumnNames = array();
-        $newColumnNames = array();
-        $columnSql = array();
+        $columns = [];
+        $oldColumnNames = [];
+        $newColumnNames = [];
+        $columnSql = [];
 
         foreach ($table->getColumns() as $columnName => $column) {
             $columnName = strtolower($columnName);
@@ -766,7 +718,7 @@ class SqlitePlatform extends AbstractPlatform
                 unset($columns[$oldColumnName]);
             }
 
-            $columns[strtolower($columnDiff->column->getName())] = $columnDiff->column;
+            $columns[strtolower((string) $columnDiff->column->getName())] = $columnDiff->column;
 
             if (isset($newColumnNames[$oldColumnName])) {
                 $newColumnNames[$oldColumnName] = $columnDiff->column->getQuotedName($this);
@@ -781,8 +733,8 @@ class SqlitePlatform extends AbstractPlatform
             $columns[strtolower($columnName)] = $column;
         }
 
-        $sql = array();
-        $tableSql = array();
+        $sql = [];
+        $tableSql = [];
         if ( ! $this->onSchemaAlterTable($diff, $tableSql)) {
             $dataTable = new Table('__temp__'.$table->getName());
 
@@ -810,8 +762,6 @@ class SqlitePlatform extends AbstractPlatform
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\TableDiff $diff
-     *
      * @return array|bool
      */
     private function getSimpleAlterTableSQL(TableDiff $diff)
@@ -825,16 +775,16 @@ class SqlitePlatform extends AbstractPlatform
 
         $table = new Table($diff->name);
 
-        $sql = array();
-        $tableSql = array();
-        $columnSql = array();
+        $sql = [];
+        $tableSql = [];
+        $columnSql = [];
 
         foreach ($diff->addedColumns as $column) {
             if ($this->onSchemaAlterTableAddColumn($column, $diff, $columnSql)) {
                 continue;
             }
 
-            $field = array_merge(array('unique' => null, 'autoincrement' => null, 'default' => null), $column->toArray());
+            $field = array_merge(['unique' => null, 'autoincrement' => null, 'default' => null], $column->toArray());
             $type = (string) $field['type'];
             switch (true) {
                 case isset($field['columnDefinition']) || $field['autoincrement'] || $field['unique']:
@@ -845,7 +795,7 @@ class SqlitePlatform extends AbstractPlatform
             }
 
             $field['name'] = $column->getQuotedName($this);
-            if (strtolower($field['type']) == 'string' && $field['length'] === null) {
+            if (strtolower((string) $field['type']) == 'string' && $field['length'] === null) {
                 $field['length'] = 255;
             }
 
@@ -863,13 +813,11 @@ class SqlitePlatform extends AbstractPlatform
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\TableDiff $diff
-     *
      * @return array
      */
     private function getColumnNamesInAlteredTable(TableDiff $diff)
     {
-        $columns = array();
+        $columns = [];
 
         foreach ($diff->fromTable->getColumns() as $columnName => $column) {
             $columns[strtolower($columnName)] = $column->getName();
@@ -891,7 +839,7 @@ class SqlitePlatform extends AbstractPlatform
         foreach ($diff->changedColumns as $oldColumnName => $columnDiff) {
             $columnName = $columnDiff->column->getName();
             $columns[strtolower($oldColumnName)] = $columnName;
-            $columns[strtolower($columnName)] = $columnName;
+            $columns[strtolower((string) $columnName)] = $columnName;
         }
 
         foreach ($diff->addedColumns as $columnName => $column) {
@@ -902,8 +850,6 @@ class SqlitePlatform extends AbstractPlatform
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\TableDiff $diff
-     *
      * @return \Doctrine\DBAL\Schema\Index[]
      */
     private function getIndexesInAlteredTable(TableDiff $diff)
@@ -913,9 +859,9 @@ class SqlitePlatform extends AbstractPlatform
 
         foreach ($indexes as $key => $index) {
             $changed = false;
-            $indexColumns = array();
+            $indexColumns = [];
             foreach ($index->getColumns() as $columnName) {
-                $normalizedColumnName = strtolower($columnName);
+                $normalizedColumnName = strtolower((string) $columnName);
                 if ( ! isset($columnNames[$normalizedColumnName])) {
                     unset($indexes[$key]);
                     continue 2;
@@ -952,8 +898,6 @@ class SqlitePlatform extends AbstractPlatform
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\TableDiff $diff
-     *
      * @return array
      */
     private function getForeignKeysInAlteredTable(TableDiff $diff)
@@ -963,9 +907,9 @@ class SqlitePlatform extends AbstractPlatform
 
         foreach ($foreignKeys as $key => $constraint) {
             $changed = false;
-            $localColumns = array();
+            $localColumns = [];
             foreach ($constraint->getLocalColumns() as $columnName) {
-                $normalizedColumnName = strtolower($columnName);
+                $normalizedColumnName = strtolower((string) $columnName);
                 if ( ! isset($columnNames[$normalizedColumnName])) {
                     unset($foreignKeys[$key]);
                     continue 2;
@@ -1002,17 +946,15 @@ class SqlitePlatform extends AbstractPlatform
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\TableDiff $diff
-     *
      * @return array
      */
     private function getPrimaryIndexInAlteredTable(TableDiff $diff)
     {
-        $primaryIndex = array();
+        $primaryIndex = [];
 
         foreach ($this->getIndexesInAlteredTable($diff) as $index) {
             if ($index->isPrimary()) {
-                $primaryIndex = array($index->getName() => $index);
+                $primaryIndex = [$index->getName() => $index];
             }
         }
 

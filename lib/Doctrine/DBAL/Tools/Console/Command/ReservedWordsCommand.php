@@ -28,20 +28,7 @@ use Doctrine\DBAL\Platforms\Keywords\ReservedKeywordsValidator;
 
 class ReservedWordsCommand extends Command
 {
-    /**
-     * @var array
-     */
-    private $keywordListClasses = array(
-        'mysql'         => 'Doctrine\DBAL\Platforms\Keywords\MySQLKeywords',
-        'sqlserver'     => 'Doctrine\DBAL\Platforms\Keywords\SQLServerKeywords',
-        'sqlserver2005' => 'Doctrine\DBAL\Platforms\Keywords\SQLServer2005Keywords',
-        'sqlserver2008' => 'Doctrine\DBAL\Platforms\Keywords\SQLServer2008Keywords',
-        'sqlserver2012' => 'Doctrine\DBAL\Platforms\Keywords\SQLServer2012Keywords',
-        'sqlite'        => 'Doctrine\DBAL\Platforms\Keywords\SQLiteKeywords',
-        'pgsql'         => 'Doctrine\DBAL\Platforms\Keywords\PostgreSQLKeywords',
-        'oracle'        => 'Doctrine\DBAL\Platforms\Keywords\OracleKeywords',
-        'db2'           => 'Doctrine\DBAL\Platforms\Keywords\DB2Keywords',
-    );
+    private array $keywordListClasses = ['mysql'         => \Doctrine\DBAL\Platforms\Keywords\MySQLKeywords::class, 'sqlserver'     => \Doctrine\DBAL\Platforms\Keywords\SQLServerKeywords::class, 'sqlserver2005' => \Doctrine\DBAL\Platforms\Keywords\SQLServer2005Keywords::class, 'sqlserver2008' => \Doctrine\DBAL\Platforms\Keywords\SQLServer2008Keywords::class, 'sqlserver2012' => \Doctrine\DBAL\Platforms\Keywords\SQLServer2012Keywords::class, 'sqlite'        => \Doctrine\DBAL\Platforms\Keywords\SQLiteKeywords::class, 'pgsql'         => \Doctrine\DBAL\Platforms\Keywords\PostgreSQLKeywords::class, 'oracle'        => \Doctrine\DBAL\Platforms\Keywords\OracleKeywords::class, 'db2'           => \Doctrine\DBAL\Platforms\Keywords\DB2Keywords::class];
 
     /**
      * If you want to add or replace a keywords list use this command.
@@ -64,11 +51,9 @@ class ReservedWordsCommand extends Command
         $this
         ->setName('dbal:reserved-words')
         ->setDescription('Checks if the current database contains identifiers that are reserved.')
-        ->setDefinition(array(
-            new InputOption(
-                'list', 'l', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Keyword-List name.'
-            )
-        ))
+        ->setDefinition([new InputOption(
+            'list', 'l', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Keyword-List name.'
+        )])
         ->setHelp(<<<EOT
 Checks if the current database contains tables and columns
 with names that are identifiers in this dialect or in other SQL dialects.
@@ -108,19 +93,10 @@ EOT
 
         $keywordLists = (array)$input->getOption('list');
         if ( ! $keywordLists) {
-            $keywordLists = array(
-                'mysql',
-                'pgsql',
-                'sqlite',
-                'oracle',
-                'sqlserver',
-                'sqlserver2005',
-                'sqlserver2008',
-                'sqlserver2012'
-            );
+            $keywordLists = ['mysql', 'pgsql', 'sqlite', 'oracle', 'sqlserver', 'sqlserver2005', 'sqlserver2008', 'sqlserver2012'];
         }
 
-        $keywords = array();
+        $keywords = [];
         foreach ($keywordLists as $keywordList) {
             if (!isset($this->keywordListClasses[$keywordList])) {
                 throw new \InvalidArgumentException(

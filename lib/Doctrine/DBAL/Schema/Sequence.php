@@ -124,8 +124,6 @@ class Sequence extends AbstractAsset
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\Visitor\Visitor $visitor
-     *
      * @return void
      */
     public function visit(Visitor $visitor)

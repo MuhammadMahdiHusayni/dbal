@@ -31,17 +31,8 @@ use Doctrine\DBAL\Connection;
  */
 class ConnectionEventArgs extends EventArgs
 {
-    /**
-     * @var \Doctrine\DBAL\Connection
-     */
-    private $_connection;
-
-    /**
-     * @param \Doctrine\DBAL\Connection $connection
-     */
-    public function __construct(Connection $connection)
+    public function __construct(private readonly Connection $_connection)
     {
-        $this->_connection = $connection;
     }
 
     /**

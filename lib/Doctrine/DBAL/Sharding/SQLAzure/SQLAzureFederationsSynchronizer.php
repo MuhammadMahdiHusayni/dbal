@@ -39,28 +39,19 @@ use Doctrine\DBAL\Schema\Synchronizer\SchemaSynchronizer;
  */
 class SQLAzureFederationsSynchronizer extends AbstractSchemaSynchronizer
 {
-    const FEDERATION_TABLE_FEDERATED   = 'azure.federated';
-    const FEDERATION_DISTRIBUTION_NAME = 'azure.federatedOnDistributionName';
+    final public const FEDERATION_TABLE_FEDERATED   = 'azure.federated';
+    final public const FEDERATION_DISTRIBUTION_NAME = 'azure.federatedOnDistributionName';
 
-    /**
-     * @var \Doctrine\DBAL\Sharding\SQLAzure\SQLAzureShardManager
-     */
-    private $shardManager;
-
-    /**
-     * @var \Doctrine\DBAL\Schema\Synchronizer\SchemaSynchronizer
-     */
-    private $synchronizer;
+    private readonly \Doctrine\DBAL\Schema\Synchronizer\SchemaSynchronizer|\Doctrine\DBAL\Schema\Synchronizer\SingleDatabaseSynchronizer $synchronizer;
 
     /**
      * @param \Doctrine\DBAL\Connection                                  $conn
      * @param \Doctrine\DBAL\Sharding\SQLAzure\SQLAzureShardManager      $shardManager
      * @param \Doctrine\DBAL\Schema\Synchronizer\SchemaSynchronizer|null $sync
      */
-    public function __construct(Connection $conn, SQLAzureShardManager $shardManager, SchemaSynchronizer $sync = null)
+    public function __construct(Connection $conn, private readonly SQLAzureShardManager $shardManager, SchemaSynchronizer $sync = null)
     {
         parent::__construct($conn);
-        $this->shardManager = $shardManager;
         $this->synchronizer = $sync ?: new SingleDatabaseSynchronizer($conn);
     }
 
@@ -69,9 +60,9 @@ class SQLAzureFederationsSynchronizer extends AbstractSchemaSynchronizer
      */
     public function getCreateSchema(Schema $createSchema)
     {
-        $sql = array();
+        $sql = [];
 
-        list($global, $federation) = $this->partitionSchema($createSchema);
+        [$global, $federation] = $this->partitionSchema($createSchema);
 
         $globalSql = $this->synchronizer->getCreateSchema($global);
         if ($globalSql) {
@@ -98,9 +89,7 @@ class SQLAzureFederationsSynchronizer extends AbstractSchemaSynchronizer
      */
     public function getUpdateSchema(Schema $toSchema, $noDrops = false)
     {
-        return $this->work($toSchema, function($synchronizer, $schema) use ($noDrops) {
-            return $synchronizer->getUpdateSchema($schema, $noDrops);
-        });
+        return $this->work($toSchema, fn($synchronizer, $schema) => $synchronizer->getUpdateSchema($schema, $noDrops));
     }
 
     /**
@@ -108,9 +97,7 @@ class SQLAzureFederationsSynchronizer extends AbstractSchemaSynchronizer
      */
     public function getDropSchema(Schema $dropSchema)
     {
-        return $this->work($dropSchema, function($synchronizer, $schema) {
-            return $synchronizer->getDropSchema($schema);
-        });
+        return $this->work($dropSchema, fn($synchronizer, $schema) => $synchronizer->getDropSchema($schema));
     }
 
     /**
@@ -142,6 +129,7 @@ class SQLAzureFederationsSynchronizer extends AbstractSchemaSynchronizer
      */
     public function getDropAllSchema()
     {
+        $sql = [];
         $this->shardManager->selectGlobal();
         $globalSql = $this->synchronizer->getDropAllSchema();
 
@@ -177,24 +165,17 @@ class SQLAzureFederationsSynchronizer extends AbstractSchemaSynchronizer
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\Schema $schema
-     *
      * @return array
      */
     private function partitionSchema(Schema $schema)
     {
-        return array(
-            $this->extractSchemaFederation($schema, false),
-            $this->extractSchemaFederation($schema, true),
-        );
+        return [$this->extractSchemaFederation($schema, false), $this->extractSchemaFederation($schema, true)];
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\Schema $schema
      * @param boolean                      $isFederation
      *
      * @return \Doctrine\DBAL\Schema\Schema
-     *
      * @throws \RuntimeException
      */
     private function extractSchemaFederation(Schema $schema, $isFederation)
@@ -226,15 +207,13 @@ class SQLAzureFederationsSynchronizer extends AbstractSchemaSynchronizer
      * perform the given operation on the underlying schema synchronizer given
      * the different partitioned schema instances.
      *
-     * @param \Doctrine\DBAL\Schema\Schema $schema
-     * @param \Closure                     $operation
      *
      * @return array
      */
     private function work(Schema $schema, \Closure $operation)
     {
-        list($global, $federation) = $this->partitionSchema($schema);
-        $sql = array();
+        [$global, $federation] = $this->partitionSchema($schema);
+        $sql = [];
 
         $this->shardManager->selectGlobal();
         $globalSql = $operation($this->synchronizer, $global);
@@ -267,19 +246,11 @@ class SQLAzureFederationsSynchronizer extends AbstractSchemaSynchronizer
     {
         $federationType = Type::getType($this->shardManager->getDistributionType());
 
-        switch ($federationType->getName()) {
-            case Type::GUID:
-                $defaultValue = '00000000-0000-0000-0000-000000000000';
-                break;
-            case Type::INTEGER:
-            case Type::SMALLINT:
-            case Type::BIGINT:
-                $defaultValue = '0';
-                break;
-            default:
-                $defaultValue = '';
-                break;
-        }
+        $defaultValue = match ($federationType->getName()) {
+            Type::GUID => '00000000-0000-0000-0000-000000000000',
+            Type::INTEGER, Type::SMALLINT, Type::BIGINT => '0',
+            default => '',
+        };
         return $defaultValue;
     }
 
@@ -289,7 +260,7 @@ class SQLAzureFederationsSynchronizer extends AbstractSchemaSynchronizer
     private function getCreateFederationStatement()
     {
         $federationType = Type::getType($this->shardManager->getDistributionType());
-        $federationTypeSql = $federationType->getSqlDeclaration(array(), $this->conn->getDatabasePlatform());
+        $federationTypeSql = $federationType->getSqlDeclaration([], $this->conn->getDatabasePlatform());
 
         return "--Create Federation\n" .
                "CREATE FEDERATION " . $this->shardManager->getFederationName() . " (" . $this->shardManager->getDistributionKey() . " " . $federationTypeSql ."  RANGE)";

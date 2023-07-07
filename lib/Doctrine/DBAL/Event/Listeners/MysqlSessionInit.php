@@ -34,34 +34,16 @@ use Doctrine\Common\EventSubscriber;
 class MysqlSessionInit implements EventSubscriber
 {
     /**
-     * The charset.
-     *
-     * @var string
-     */
-    private $_charset;
-
-    /**
-     * The collation, or FALSE if no collation.
-     *
-     * @var string|boolean
-     */
-    private $_collation;
-
-    /**
      * Configure Charset and Collation options of MySQL Client for each Connection.
      *
-     * @param string         $charset   The charset.
-     * @param string|boolean $collation The collation, or FALSE if no collation.
+     * @param string $_charset The charset.
+     * @param string|boolean $_collation The collation, or FALSE if no collation.
      */
-    public function __construct($charset = 'utf8', $collation = false)
+    public function __construct(private $_charset = 'utf8', private $_collation = false)
     {
-        $this->_charset = $charset;
-        $this->_collation = $collation;
     }
 
     /**
-     * @param \Doctrine\DBAL\Event\ConnectionEventArgs $args
-     *
      * @return void
      */
     public function postConnect(ConnectionEventArgs $args)
@@ -75,6 +57,6 @@ class MysqlSessionInit implements EventSubscriber
      */
     public function getSubscribedEvents()
     {
-        return array(Events::postConnect);
+        return [Events::postConnect];
     }
 }

@@ -31,38 +31,13 @@ use Doctrine\DBAL\Schema\Index;
  */
 class SchemaIndexDefinitionEventArgs extends SchemaEventArgs
 {
-    /**
-     * @var \Doctrine\DBAL\Schema\Index|null
-     */
-    private $_index = null;
+    private ?\Doctrine\DBAL\Schema\Index $_index = null;
 
     /**
-     * Raw index data as fetched from the database.
-     *
-     * @var array
+     * @param string $_table
      */
-    private $_tableIndex;
-
-    /**
-     * @var string
-     */
-    private $_table;
-
-    /**
-     * @var \Doctrine\DBAL\Connection
-     */
-    private $_connection;
-
-    /**
-     * @param array                     $tableIndex
-     * @param string                    $table
-     * @param \Doctrine\DBAL\Connection $connection
-     */
-    public function __construct(array $tableIndex, $table, Connection $connection)
+    public function __construct(private readonly array $_tableIndex, private $_table, private readonly Connection $_connection)
     {
-        $this->_tableIndex = $tableIndex;
-        $this->_table      = $table;
-        $this->_connection = $connection;
     }
 
     /**

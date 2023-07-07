@@ -44,8 +44,6 @@ class SQLServer2008Keywords extends SQLServer2005Keywords
      */
     protected function getKeywords()
     {
-        return array_merge(parent::getKeywords(), array(
-            'MERGE'
-        ));
+        return array_merge(parent::getKeywords(), ['MERGE']);
     }
 }

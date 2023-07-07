@@ -29,10 +29,7 @@ use Doctrine\DBAL\Schema\ForeignKeyConstraint;
  */
 class Graphviz extends AbstractVisitor
 {
-    /**
-     * @var string
-     */
-    private $output = '';
+    private string $output = '';
 
     /**
      * {@inheritdoc}
@@ -42,11 +39,7 @@ class Graphviz extends AbstractVisitor
         $this->output .= $this->createNodeRelation(
             $fkConstraint->getLocalTableName() . ":col" . current($fkConstraint->getLocalColumns()).":se",
             $fkConstraint->getForeignTableName() . ":col" . current($fkConstraint->getForeignColumns()).":se",
-            array(
-                'dir'       => 'back',
-                'arrowtail' => 'dot',
-                'arrowhead' => 'normal',
-            )
+            ['dir'       => 'back', 'arrowtail' => 'dot', 'arrowhead' => 'normal']
         );
     }
 
@@ -55,7 +48,7 @@ class Graphviz extends AbstractVisitor
      */
     public function acceptSchema(Schema $schema)
     {
-        $this->output  = 'digraph "' . sha1( mt_rand() ) . '" {' . "\n";
+        $this->output  = 'digraph "' . sha1( random_int(0, mt_getrandmax()) ) . '" {' . "\n";
         $this->output .= 'splines = true;' . "\n";
         $this->output .= 'overlap = false;' . "\n";
         $this->output .= 'outputorder=edgesfirst;'."\n";
@@ -70,16 +63,11 @@ class Graphviz extends AbstractVisitor
     {
         $this->output .= $this->createNode(
             $table->getName(),
-            array(
-                'label' => $this->createTableLabel( $table ),
-                'shape' => 'plaintext',
-            )
+            ['label' => $this->createTableLabel( $table ), 'shape' => 'plaintext']
         );
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\Table $table
-     *
      * @return string
      */
     private function createTableLabel(Table $table)

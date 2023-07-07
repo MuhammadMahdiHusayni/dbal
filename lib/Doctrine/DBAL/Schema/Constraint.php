@@ -36,8 +36,6 @@ interface Constraint
     public function getName();
 
     /**
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
-     *
      * @return string
      */
     public function getQuotedName(AbstractPlatform $platform);

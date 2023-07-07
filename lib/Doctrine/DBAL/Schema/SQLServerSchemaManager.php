@@ -56,7 +56,7 @@ class SQLServerSchemaManager extends AbstractSchemaManager
             $tableColumn['name'] = '';
         }
 
-        while ($default != ($default2 = preg_replace("/^\((.*)\)$/", '$1', $default))) {
+        while ($default != ($default2 = preg_replace("/^\((.*)\)$/", '$1', (string) $default))) {
             $default = trim($default2, "'");
 
             if ($default == 'getdate()') {
@@ -90,20 +90,9 @@ class SQLServerSchemaManager extends AbstractSchemaManager
                 break;
         }
 
-        $options = array(
-            'length' => ($length == 0 || !in_array($type, array('text', 'string'))) ? null : $length,
-            'unsigned' => false,
-            'fixed' => (bool) $fixed,
-            'default' => $default !== 'NULL' ? $default : null,
-            'notnull' => (bool) $tableColumn['notnull'],
-            'scale' => $tableColumn['scale'],
-            'precision' => $tableColumn['precision'],
-            'autoincrement' => (bool) $tableColumn['autoincrement'],
-        );
+        $options = ['length' => ($length == 0 || !in_array($type, ['text', 'string'])) ? null : $length, 'unsigned' => false, 'fixed' => (bool) $fixed, 'default' => $default !== 'NULL' ? $default : null, 'notnull' => (bool) $tableColumn['notnull'], 'scale' => $tableColumn['scale'], 'precision' => $tableColumn['precision'], 'autoincrement' => (bool) $tableColumn['autoincrement']];
 
-        $platformOptions = array(
-            'collate' => $tableColumn['collation'] == 'NULL' ? null : $tableColumn['collation']
-        );
+        $platformOptions = ['collate' => $tableColumn['collation'] == 'NULL' ? null : $tableColumn['collation']];
 
         $column = new Column($tableColumn['name'], Type::getType($type), $options);
         $column->setPlatformOptions($platformOptions);
@@ -116,20 +105,11 @@ class SQLServerSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableTableForeignKeysList($tableForeignKeys)
     {
-        $foreignKeys = array();
+        $foreignKeys = [];
 
         foreach ($tableForeignKeys as $tableForeignKey) {
             if ( ! isset($foreignKeys[$tableForeignKey['ForeignKey']])) {
-                $foreignKeys[$tableForeignKey['ForeignKey']] = array(
-                    'local_columns' => array($tableForeignKey['ColumnName']),
-                    'foreign_table' => $tableForeignKey['ReferenceTableName'],
-                    'foreign_columns' => array($tableForeignKey['ReferenceColumnName']),
-                    'name' => $tableForeignKey['ForeignKey'],
-                    'options' => array(
-                        'onUpdate' => str_replace('_', ' ', $tableForeignKey['update_referential_action_desc']),
-                        'onDelete' => str_replace('_', ' ', $tableForeignKey['delete_referential_action_desc'])
-                    )
-                );
+                $foreignKeys[$tableForeignKey['ForeignKey']] = ['local_columns' => [$tableForeignKey['ColumnName']], 'foreign_table' => $tableForeignKey['ReferenceTableName'], 'foreign_columns' => [$tableForeignKey['ReferenceColumnName']], 'name' => $tableForeignKey['ForeignKey'], 'options' => ['onUpdate' => str_replace('_', ' ', (string) $tableForeignKey['update_referential_action_desc']), 'onDelete' => str_replace('_', ' ', (string) $tableForeignKey['delete_referential_action_desc'])]];
             } else {
                 $foreignKeys[$tableForeignKey['ForeignKey']]['local_columns'][] = $tableForeignKey['ColumnName'];
                 $foreignKeys[$tableForeignKey['ForeignKey']]['foreign_columns'][] = $tableForeignKey['ReferenceColumnName'];
@@ -147,7 +127,7 @@ class SQLServerSchemaManager extends AbstractSchemaManager
         foreach ($tableIndexRows as &$tableIndex) {
             $tableIndex['non_unique'] = (boolean) $tableIndex['non_unique'];
             $tableIndex['primary'] = (boolean) $tableIndex['primary'];
-            $tableIndex['flags'] = $tableIndex['flags'] ? array($tableIndex['flags']) : null;
+            $tableIndex['flags'] = $tableIndex['flags'] ? [$tableIndex['flags']] : null;
         }
 
         return parent::_getPortableTableIndexesList($tableIndexRows, $tableName);
@@ -203,13 +183,13 @@ class SQLServerSchemaManager extends AbstractSchemaManager
             $tableIndexes = $this->_conn->fetchAll($sql);
         } catch(\PDOException $e) {
             if ($e->getCode() == "IMSSP") {
-                return array();
+                return [];
             } else {
                 throw $e;
             }
         } catch(SQLSrvException $e) {
-            if (strpos($e->getMessage(), 'SQLSTATE [01000, 15472]') === 0) {
-                return array();
+            if (str_starts_with($e->getMessage(), 'SQLSTATE [01000, 15472]')) {
+                return [];
             } else {
                 throw $e;
             }

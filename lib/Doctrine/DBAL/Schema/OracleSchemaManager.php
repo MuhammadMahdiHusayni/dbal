@@ -46,9 +46,7 @@ class OracleSchemaManager extends AbstractSchemaManager
     {
         $user = \array_change_key_case($user, CASE_LOWER);
 
-        return array(
-            'user' => $user['username'],
-        );
+        return ['user' => $user['username']];
     }
 
     /**
@@ -69,13 +67,13 @@ class OracleSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableTableIndexesList($tableIndexes, $tableName=null)
     {
-        $indexBuffer = array();
+        $indexBuffer = [];
         foreach ( $tableIndexes as $tableIndex ) {
             $tableIndex = \array_change_key_case($tableIndex, CASE_LOWER);
 
-            $keyName = strtolower($tableIndex['name']);
+            $keyName = strtolower((string) $tableIndex['name']);
 
-            if ( strtolower($tableIndex['is_primary']) == "p" ) {
+            if ( strtolower((string) $tableIndex['is_primary']) == "p" ) {
                 $keyName = 'primary';
                 $buffer['primary'] = true;
                 $buffer['non_unique'] = false;
@@ -98,8 +96,8 @@ class OracleSchemaManager extends AbstractSchemaManager
     {
         $tableColumn = \array_change_key_case($tableColumn, CASE_LOWER);
 
-        $dbType = strtolower($tableColumn['data_type']);
-        if(strpos($dbType, "timestamp(") === 0) {
+        $dbType = strtolower((string) $tableColumn['data_type']);
+        if(str_starts_with($dbType, "timestamp(")) {
             if (strpos($dbType, "WITH TIME ZONE")) {
                 $dbType = "timestamptz";
             } else {
@@ -120,7 +118,7 @@ class OracleSchemaManager extends AbstractSchemaManager
         if (null !== $tableColumn['data_default']) {
             // Default values returned from database are enclosed in single quotes.
             // Sometimes trailing spaces are also encountered.
-            $tableColumn['data_default'] = trim(trim($tableColumn['data_default']), "'");
+            $tableColumn['data_default'] = trim(trim((string) $tableColumn['data_default']), "'");
         }
 
         $precision = null;
@@ -191,17 +189,7 @@ class OracleSchemaManager extends AbstractSchemaManager
                 $length = null;
         }
 
-        $options = array(
-            'notnull'    => (bool) ($tableColumn['nullable'] === 'N'),
-            'fixed'      => (bool) $fixed,
-            'unsigned'   => (bool) $unsigned,
-            'default'    => $tableColumn['data_default'],
-            'length'     => $length,
-            'precision'  => $precision,
-            'scale'      => $scale,
-            'comment'       => (isset($tableColumn['comments'])) ? $tableColumn['comments'] : null,
-            'platformDetails' => array(),
-        );
+        $options = ['notnull'    => (bool) ($tableColumn['nullable'] === 'N'), 'fixed'      => (bool) $fixed, 'unsigned'   => (bool) $unsigned, 'default'    => $tableColumn['data_default'], 'length'     => $length, 'precision'  => $precision, 'scale'      => $scale, 'comment'       => $tableColumn['comments'] ?? null, 'platformDetails' => []];
 
         return new Column($tableColumn['column_name'], \Doctrine\DBAL\Types\Type::getType($type), $options);
     }
@@ -211,7 +199,7 @@ class OracleSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableTableForeignKeysList($tableForeignKeys)
     {
-        $list = array();
+        $list = [];
         foreach ($tableForeignKeys as $value) {
             $value = \array_change_key_case($value, CASE_LOWER);
             if (!isset($list[$value['constraint_name']])) {
@@ -219,24 +207,18 @@ class OracleSchemaManager extends AbstractSchemaManager
                     $value['delete_rule'] = null;
                 }
 
-                $list[$value['constraint_name']] = array(
-                    'name' => $value['constraint_name'],
-                    'local' => array(),
-                    'foreign' => array(),
-                    'foreignTable' => $value['references_table'],
-                    'onDelete' => $value['delete_rule'],
-                );
+                $list[$value['constraint_name']] = ['name' => $value['constraint_name'], 'local' => [], 'foreign' => [], 'foreignTable' => $value['references_table'], 'onDelete' => $value['delete_rule']];
             }
             $list[$value['constraint_name']]['local'][$value['position']] = $value['local_column'];
             $list[$value['constraint_name']]['foreign'][$value['position']] = $value['foreign_column'];
         }
 
-        $result = array();
+        $result = [];
         foreach($list as $constraint) {
             $result[] = new ForeignKeyConstraint(
                 array_values($constraint['local']), $constraint['foreignTable'],
                 array_values($constraint['foreign']),  $constraint['name'],
-                array('onDelete' => $constraint['onDelete'])
+                ['onDelete' => $constraint['onDelete']]
             );
         }
 

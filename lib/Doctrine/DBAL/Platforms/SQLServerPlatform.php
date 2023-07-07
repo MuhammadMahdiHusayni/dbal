@@ -191,9 +191,10 @@ class SQLServerPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function _getCreateTableSQL($tableName, array $columns, array $options = array())
+    protected function _getCreateTableSQL($tableName, array $columns, array $options = [])
     {
-        $defaultConstraintsSql = array();
+        $sql = [];
+        $defaultConstraintsSql = [];
 
         // @todo does other code breaks because of this?
         // force primary keys to be not null
@@ -334,13 +335,12 @@ class SQLServerPlatform extends AbstractPlatform
      * Extend unique key constraint with required filters
      *
      * @param string                      $sql
-     * @param \Doctrine\DBAL\Schema\Index $index
      *
      * @return string
      */
     private function _appendUniqueConstraintDefinition($sql, Index $index)
     {
-        $fields = array();
+        $fields = [];
 
         foreach ($index->getQuotedColumns($this) as $field) {
             $fields[] = $field . ' IS NOT NULL';
@@ -354,9 +354,9 @@ class SQLServerPlatform extends AbstractPlatform
      */
     public function getAlterTableSQL(TableDiff $diff)
     {
-        $queryParts = array();
-        $sql = array();
-        $columnSql = array();
+        $queryParts = [];
+        $sql = [];
+        $columnSql = [];
 
         /** @var \Doctrine\DBAL\Schema\Column $column */
         foreach ($diff->addedColumns as $column) {
@@ -442,7 +442,7 @@ class SQLServerPlatform extends AbstractPlatform
             }
         }
 
-        $tableSql = array();
+        $tableSql = [];
 
         if ($this->onSchemaAlterTable($diff, $tableSql)) {
             return array_merge($tableSql, $columnSql);
@@ -799,6 +799,7 @@ class SQLServerPlatform extends AbstractPlatform
      */
     protected function doModifyLimitQuery($query, $limit, $offset = null)
     {
+        $overColumns = [];
         if ($limit === null) {
             return $query;
         }
@@ -827,18 +828,13 @@ class SQLServerPlatform extends AbstractPlatform
         //Clear ORDER BY
         $orderBy        = preg_replace('/ORDER\s+BY\s+([^\)]*)(.*)/', '$1', $orderBy);
         $orderByParts   = explode(',', $orderBy);
-        $orderbyColumns = array();
+        $orderbyColumns = [];
 
         //Split ORDER BY into parts
         foreach ($orderByParts as &$part) {
 
             if (preg_match('/(([^\s]*)\.)?([^\.\s]*)\s*(ASC|DESC)?/i', trim($part), $matches)) {
-                $orderbyColumns[] = array(
-                    'column'    => $matches[3],
-                    'hasTable'  => ( ! empty($matches[2])),
-                    'sort'      => isset($matches[4]) ? $matches[4] : null,
-                    'table'     => empty($matches[2]) ? '[^\.\s]*' : $matches[2]
-                );
+                $orderbyColumns[] = ['column'    => $matches[3], 'hasTable'  => ( ! empty($matches[2])), 'sort'      => $matches[4] ?? null, 'table'     => empty($matches[2]) ? '[^\.\s]*' : $matches[2]];
             }
         }
 
@@ -953,34 +949,7 @@ class SQLServerPlatform extends AbstractPlatform
      */
     protected function initializeDoctrineTypeMappings()
     {
-        $this->doctrineTypeMapping = array(
-            'bigint' => 'bigint',
-            'numeric' => 'decimal',
-            'bit' => 'boolean',
-            'smallint' => 'smallint',
-            'decimal' => 'decimal',
-            'smallmoney' => 'integer',
-            'int' => 'integer',
-            'tinyint' => 'smallint',
-            'money' => 'integer',
-            'float' => 'float',
-            'real' => 'float',
-            'double' => 'float',
-            'double precision' => 'float',
-            'datetimeoffset' => 'datetimetz',
-            'smalldatetime' => 'datetime',
-            'datetime' => 'datetime',
-            'char' => 'string',
-            'varchar' => 'string',
-            'text' => 'text',
-            'nchar' => 'string',
-            'nvarchar' => 'string',
-            'ntext' => 'text',
-            'binary' => 'text',
-            'varbinary' => 'blob',
-            'image' => 'text',
-            'uniqueidentifier' => 'guid',
-        );
+        $this->doctrineTypeMapping = ['bigint' => 'bigint', 'numeric' => 'decimal', 'bit' => 'boolean', 'smallint' => 'smallint', 'decimal' => 'decimal', 'smallmoney' => 'integer', 'int' => 'integer', 'tinyint' => 'smallint', 'money' => 'integer', 'float' => 'float', 'real' => 'float', 'double' => 'float', 'double precision' => 'float', 'datetimeoffset' => 'datetimetz', 'smalldatetime' => 'datetime', 'datetime' => 'datetime', 'char' => 'string', 'varchar' => 'string', 'text' => 'text', 'nchar' => 'string', 'nvarchar' => 'string', 'ntext' => 'text', 'binary' => 'text', 'varbinary' => 'blob', 'image' => 'text', 'uniqueidentifier' => 'guid'];
     }
 
     /**
@@ -1012,19 +981,12 @@ class SQLServerPlatform extends AbstractPlatform
      */
     public function appendLockHint($fromClause, $lockMode)
     {
-        switch (true) {
-            case LockMode::NONE === $lockMode:
-                return $fromClause . ' WITH (NOLOCK)';
-
-            case LockMode::PESSIMISTIC_READ === $lockMode:
-                return $fromClause . ' WITH (HOLDLOCK, ROWLOCK)';
-
-            case LockMode::PESSIMISTIC_WRITE === $lockMode:
-                return $fromClause . ' WITH (UPDLOCK, ROWLOCK)';
-
-            default:
-                return $fromClause;
-        }
+        return match (true) {
+            LockMode::NONE === $lockMode => $fromClause . ' WITH (NOLOCK)',
+            LockMode::PESSIMISTIC_READ === $lockMode => $fromClause . ' WITH (HOLDLOCK, ROWLOCK)',
+            LockMode::PESSIMISTIC_WRITE === $lockMode => $fromClause . ' WITH (UPDLOCK, ROWLOCK)',
+            default => $fromClause,
+        };
     }
 
     /**
@@ -1040,7 +1002,7 @@ class SQLServerPlatform extends AbstractPlatform
      */
     protected function getReservedKeywordsClass()
     {
-        return 'Doctrine\DBAL\Platforms\Keywords\SQLServerKeywords';
+        return \Doctrine\DBAL\Platforms\Keywords\SQLServerKeywords::class;
     }
 
     /**
@@ -1080,7 +1042,7 @@ class SQLServerPlatform extends AbstractPlatform
             return " DEFAULT '" . $field['default'] . "'";
         }
 
-        if (in_array((string) $field['type'], array('Integer', 'BigInteger', 'SmallInteger'))) {
+        if (in_array((string) $field['type'], ['Integer', 'BigInteger', 'SmallInteger'])) {
             return " DEFAULT " . $field['default'];
         }
 

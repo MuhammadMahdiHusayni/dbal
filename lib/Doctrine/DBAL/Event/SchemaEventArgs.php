@@ -30,10 +30,7 @@ use Doctrine\Common\EventArgs;
  */
 class SchemaEventArgs extends EventArgs
 {
-    /**
-     * @var boolean
-     */
-    private $_preventDefault = false;
+    private bool $_preventDefault = false;
 
     /**
      * @return \Doctrine\DBAL\Event\SchemaEventArgs

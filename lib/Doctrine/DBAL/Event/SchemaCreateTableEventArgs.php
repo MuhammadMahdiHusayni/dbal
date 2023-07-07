@@ -31,43 +31,10 @@ use Doctrine\DBAL\Schema\Table;
  */
 class SchemaCreateTableEventArgs extends SchemaEventArgs
 {
-    /**
-     * @var \Doctrine\DBAL\Schema\Table
-     */
-    private $_table;
+    private array $_sql = [];
 
-    /**
-     * @var array
-     */
-    private $_columns;
-
-    /**
-     * @var array
-     */
-    private $_options;
-
-    /**
-     * @var \Doctrine\DBAL\Platforms\AbstractPlatform
-     */
-    private $_platform;
-
-    /**
-     * @var array
-     */
-    private $_sql = array();
-
-    /**
-     * @param \Doctrine\DBAL\Schema\Table               $table
-     * @param array                                     $columns
-     * @param array                                     $options
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
-     */
-    public function __construct(Table $table, array $columns, array $options, AbstractPlatform $platform)
+    public function __construct(private readonly Table $_table, private readonly array $_columns, private readonly array $_options, private readonly AbstractPlatform $_platform)
     {
-        $this->_table    = $table;
-        $this->_columns  = $columns;
-        $this->_options  = $options;
-        $this->_platform = $platform;
     }
 
     /**

@@ -36,13 +36,13 @@ use Doctrine\DBAL\Schema\Table;
  */
 class MySqlPlatform extends AbstractPlatform
 {
-    const LENGTH_LIMIT_TINYTEXT   = 255;
-    const LENGTH_LIMIT_TEXT       = 65535;
-    const LENGTH_LIMIT_MEDIUMTEXT = 16777215;
+    final public const LENGTH_LIMIT_TINYTEXT   = 255;
+    final public const LENGTH_LIMIT_TEXT       = 65535;
+    final public const LENGTH_LIMIT_MEDIUMTEXT = 16_777_215;
 
-    const LENGTH_LIMIT_TINYBLOB   = 255;
-    const LENGTH_LIMIT_BLOB       = 65535;
-    const LENGTH_LIMIT_MEDIUMBLOB = 16777215;
+    final public const LENGTH_LIMIT_TINYBLOB   = 255;
+    final public const LENGTH_LIMIT_BLOB       = 65535;
+    final public const LENGTH_LIMIT_MEDIUMBLOB = 16_777_215;
 
     /**
      * Adds MySQL-specific LIMIT clause to the query
@@ -405,8 +405,9 @@ class MySqlPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function _getCreateTableSQL($tableName, array $columns, array $options = array())
+    protected function _getCreateTableSQL($tableName, array $columns, array $options = [])
     {
+        $sql = [];
         $queryFields = $this->getColumnDeclarationListSQL($columns);
 
         if (isset($options['uniqueConstraints']) && ! empty($options['uniqueConstraints'])) {
@@ -452,7 +453,6 @@ class MySqlPlatform extends AbstractPlatform
     /**
      * Build SQL for table options
      *
-     * @param array $options
      *
      * @return string
      */
@@ -462,7 +462,7 @@ class MySqlPlatform extends AbstractPlatform
             return $options['table_options'];
         }
 
-        $tableOptions = array();
+        $tableOptions = [];
 
         // Charset
         if ( ! isset($options['charset'])) {
@@ -492,7 +492,7 @@ class MySqlPlatform extends AbstractPlatform
 
         // Comment
         if (isset($options['comment'])) {
-            $comment = trim($options['comment'], " '");
+            $comment = trim((string) $options['comment'], " '");
 
             $tableOptions[] = sprintf("COMMENT = '%s' ", str_replace("'", "''", $comment));
         }
@@ -508,7 +508,6 @@ class MySqlPlatform extends AbstractPlatform
     /**
      * Build SQL for partition options.
      *
-     * @param array $options
      *
      * @return string
      */
@@ -524,8 +523,8 @@ class MySqlPlatform extends AbstractPlatform
      */
     public function getAlterTableSQL(TableDiff $diff)
     {
-        $columnSql = array();
-        $queryParts = array();
+        $columnSql = [];
+        $queryParts = [];
         if ($diff->newName !== false) {
             $queryParts[] = 'RENAME TO ' . $diff->newName;
         }
@@ -578,8 +577,8 @@ class MySqlPlatform extends AbstractPlatform
             unset($diff->addedIndexes['primary']);
         }
 
-        $sql = array();
-        $tableSql = array();
+        $sql = [];
+        $tableSql = [];
 
         if ( ! $this->onSchemaAlterTable($diff, $tableSql)) {
             if (count($queryParts) > 0) {
@@ -600,7 +599,7 @@ class MySqlPlatform extends AbstractPlatform
      */
     protected function getPreAlterTableIndexForeignKeySQL(TableDiff $diff)
     {
-        $sql = array();
+        $sql = [];
         $table = $diff->name;
 
         foreach ($diff->removedIndexes as $remKey => $remIndex) {
@@ -662,7 +661,7 @@ class MySqlPlatform extends AbstractPlatform
      */
     private function getPreAlterTableAlterIndexForeignKeySQL(TableDiff $diff)
     {
-        $sql = array();
+        $sql = [];
         $table = $diff->name;
 
         foreach ($diff->changedIndexes as $changedIndex) {
@@ -824,38 +823,7 @@ class MySqlPlatform extends AbstractPlatform
      */
     protected function initializeDoctrineTypeMappings()
     {
-        $this->doctrineTypeMapping = array(
-            'tinyint'       => 'boolean',
-            'smallint'      => 'smallint',
-            'mediumint'     => 'integer',
-            'int'           => 'integer',
-            'integer'       => 'integer',
-            'bigint'        => 'bigint',
-            'tinytext'      => 'text',
-            'mediumtext'    => 'text',
-            'longtext'      => 'text',
-            'text'          => 'text',
-            'varchar'       => 'string',
-            'string'        => 'string',
-            'char'          => 'string',
-            'date'          => 'date',
-            'datetime'      => 'datetime',
-            'timestamp'     => 'datetime',
-            'time'          => 'time',
-            'float'         => 'float',
-            'double'        => 'float',
-            'real'          => 'float',
-            'decimal'       => 'decimal',
-            'numeric'       => 'decimal',
-            'year'          => 'date',
-            'longblob'      => 'blob',
-            'blob'          => 'blob',
-            'mediumblob'    => 'blob',
-            'tinyblob'      => 'blob',
-            'binary'        => 'blob',
-            'varbinary'     => 'blob',
-            'set'           => 'simple_array',
-        );
+        $this->doctrineTypeMapping = ['tinyint'       => 'boolean', 'smallint'      => 'smallint', 'mediumint'     => 'integer', 'int'           => 'integer', 'integer'       => 'integer', 'bigint'        => 'bigint', 'tinytext'      => 'text', 'mediumtext'    => 'text', 'longtext'      => 'text', 'text'          => 'text', 'varchar'       => 'string', 'string'        => 'string', 'char'          => 'string', 'date'          => 'date', 'datetime'      => 'datetime', 'timestamp'     => 'datetime', 'time'          => 'time', 'float'         => 'float', 'double'        => 'float', 'real'          => 'float', 'decimal'       => 'decimal', 'numeric'       => 'decimal', 'year'          => 'date', 'longblob'      => 'blob', 'blob'          => 'blob', 'mediumblob'    => 'blob', 'tinyblob'      => 'blob', 'binary'        => 'blob', 'varbinary'     => 'blob', 'set'           => 'simple_array'];
     }
 
     /**
@@ -871,7 +839,7 @@ class MySqlPlatform extends AbstractPlatform
      */
     protected function getReservedKeywordsClass()
     {
-        return 'Doctrine\DBAL\Platforms\Keywords\MySQLKeywords';
+        return \Doctrine\DBAL\Platforms\Keywords\MySQLKeywords::class;
     }
 
     /**

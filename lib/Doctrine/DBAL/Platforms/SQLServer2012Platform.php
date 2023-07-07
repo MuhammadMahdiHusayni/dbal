@@ -100,6 +100,6 @@ class SQLServer2012Platform extends SQLServer2008Platform
      */
     protected function getReservedKeywordsClass()
     {
-        return 'Doctrine\DBAL\Platforms\Keywords\SQLServer2012Keywords';
+        return \Doctrine\DBAL\Platforms\Keywords\SQLServer2012Keywords::class;
     }
 }

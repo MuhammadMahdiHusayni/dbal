@@ -31,30 +31,11 @@ use Doctrine\Common\Cache\Cache;
 class QueryCacheProfile
 {
     /**
-     * @var \Doctrine\Common\Cache\Cache|null
-     */
-    private $resultCacheDriver;
-
-    /**
-     * @var integer
-     */
-    private $lifetime = 0;
-
-    /**
-     * @var string|null
-     */
-    private $cacheKey;
-
-    /**
      * @param integer                           $lifetime
      * @param string|null                       $cacheKey
-     * @param \Doctrine\Common\Cache\Cache|null $resultCache
      */
-    public function __construct($lifetime = 0, $cacheKey = null, Cache $resultCache = null)
+    public function __construct(private $lifetime = 0, private $cacheKey = null, private readonly ?\Doctrine\Common\Cache\Cache $resultCacheDriver = null)
     {
-        $this->lifetime = $lifetime;
-        $this->cacheKey = $cacheKey;
-        $this->resultCacheDriver = $resultCache;
     }
 
     /**
@@ -106,12 +87,10 @@ class QueryCacheProfile
             $cacheKey = $this->cacheKey;
         }
 
-        return array($cacheKey, $realCacheKey);
+        return [$cacheKey, $realCacheKey];
     }
 
     /**
-     * @param \Doctrine\Common\Cache\Cache $cache
-     *
      * @return \Doctrine\DBAL\Cache\QueryCacheProfile
      */
     public function setResultCacheDriver(Cache $cache)

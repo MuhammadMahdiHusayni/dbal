@@ -26,33 +26,14 @@ use Doctrine\DBAL\Schema\Sequence;
 
 class CreateSchemaSqlCollector extends AbstractVisitor
 {
-    /**
-     * @var array
-     */
-    private $createTableQueries = array();
+    private array $createTableQueries = [];
 
-    /**
-     * @var array
-     */
-    private $createSequenceQueries = array();
+    private array $createSequenceQueries = [];
 
-    /**
-     * @var array
-     */
-    private $createFkConstraintQueries = array();
+    private array $createFkConstraintQueries = [];
 
-    /**
-     *
-     * @var \Doctrine\DBAL\Platforms\AbstractPlatform
-     */
-    private $platform = null;
-
-    /**
-     * @param AbstractPlatform $platform
-     */
-    public function __construct(AbstractPlatform $platform)
+    public function __construct(private readonly AbstractPlatform $platform)
     {
-        $this->platform = $platform;
     }
 
     /**
@@ -107,9 +88,9 @@ class CreateSchemaSqlCollector extends AbstractVisitor
     {
         $namespace = $asset->getNamespaceName() ?: 'default';
         if ( !isset($this->createTableQueries[$namespace])) {
-            $this->createTableQueries[$namespace] = array();
-            $this->createSequenceQueries[$namespace] = array();
-            $this->createFkConstraintQueries[$namespace] = array();
+            $this->createTableQueries[$namespace] = [];
+            $this->createSequenceQueries[$namespace] = [];
+            $this->createFkConstraintQueries[$namespace] = [];
         }
 
         return $namespace;
@@ -120,9 +101,9 @@ class CreateSchemaSqlCollector extends AbstractVisitor
      */
     public function resetQueries()
     {
-        $this->createTableQueries = array();
-        $this->createSequenceQueries = array();
-        $this->createFkConstraintQueries = array();
+        $this->createTableQueries = [];
+        $this->createSequenceQueries = [];
+        $this->createFkConstraintQueries = [];
     }
 
     /**
@@ -132,7 +113,7 @@ class CreateSchemaSqlCollector extends AbstractVisitor
      */
     public function getQueries()
     {
-        $sql = array();
+        $sql = [];
 
         foreach (array_keys($this->createTableQueries) as $namespace) {
             if ($this->platform->supportsSchemas()) {

@@ -41,10 +41,7 @@ use Doctrine\DBAL\Schema\Sequence;
  */
 class RemoveNamespacedAssets extends AbstractVisitor
 {
-    /**
-     * @var \Doctrine\DBAL\Schema\Schema
-     */
-    private $schema;
+    private ?\Doctrine\DBAL\Schema\Schema $schema = null;
 
     /**
      * {@inheritdoc}

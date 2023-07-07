@@ -31,29 +31,10 @@ use Doctrine\DBAL\Schema\TableDiff;
  */
 class SchemaAlterTableEventArgs extends SchemaEventArgs
 {
-    /**
-     * @var \Doctrine\DBAL\Schema\TableDiff
-     */
-    private $_tableDiff;
+    private array $_sql = [];
 
-    /**
-     * @var \Doctrine\DBAL\Platforms\AbstractPlatform
-     */
-    private $_platform;
-
-    /**
-     * @var array
-     */
-    private $_sql = array();
-
-    /**
-     * @param \Doctrine\DBAL\Schema\TableDiff           $tableDiff
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
-     */
-    public function __construct(TableDiff $tableDiff, AbstractPlatform $platform)
+    public function __construct(private readonly TableDiff $_tableDiff, private readonly AbstractPlatform $_platform)
     {
-        $this->_tableDiff = $tableDiff;
-        $this->_platform  = $platform;
     }
 
     /**

@@ -28,13 +28,13 @@ namespace Doctrine\DBAL;
  */
 class SQLParserUtils
 {
-    const POSITIONAL_TOKEN = '\?';
-    const NAMED_TOKEN      = '(?<!:):[a-zA-Z_][a-zA-Z0-9_]*';
+    final public const POSITIONAL_TOKEN = '\?';
+    final public const NAMED_TOKEN      = '(?<!:):[a-zA-Z_][a-zA-Z0-9_]*';
 
     // Quote characters within string literals can be preceded by a backslash.
-    const ESCAPED_SINGLE_QUOTED_TEXT = "'(?:[^'\\\\]|\\\\'?)*'";
-    const ESCAPED_DOUBLE_QUOTED_TEXT = '"(?:[^"\\\\]|\\\\"?)*"';
-    const ESCAPED_BACKTICK_QUOTED_TEXT = '`(?:[^`\\\\]|\\\\`?)*`';
+    final public const ESCAPED_SINGLE_QUOTED_TEXT = "'(?:[^'\\\\]|\\\\'?)*'";
+    final public const ESCAPED_DOUBLE_QUOTED_TEXT = '"(?:[^"\\\\]|\\\\"?)*"';
+    final public const ESCAPED_BACKTICK_QUOTED_TEXT = '`(?:[^`\\\\]|\\\\`?)*`';
 
     /**
      * Gets an array of the placeholders in an sql statements as keys and their positions in the query string.
@@ -50,15 +50,15 @@ class SQLParserUtils
     static public function getPlaceholderPositions($statement, $isPositional = true)
     {
         $match = ($isPositional) ? '?' : ':';
-        if (strpos($statement, $match) === false) {
-            return array();
+        if (!str_contains($statement, $match)) {
+            return [];
         }
 
         $token = ($isPositional) ? self::POSITIONAL_TOKEN : self::NAMED_TOKEN;
-        $paramMap = array();
+        $paramMap = [];
 
         foreach (self::getUnquotedStatementFragments($statement) as $fragment) {
-            preg_match_all("/$token/", $fragment[0], $matches, PREG_OFFSET_CAPTURE);
+            preg_match_all("/$token/", (string) $fragment[0], $matches, PREG_OFFSET_CAPTURE);
             foreach ($matches[0] as $placeholder) {
                 if ($isPositional) {
                     $paramMap[] = $placeholder[1] + $fragment[1];
@@ -86,7 +86,7 @@ class SQLParserUtils
     static public function expandListParameters($query, $params, $types)
     {
         $isPositional   = is_int(key($params));
-        $arrayPositions = array();
+        $arrayPositions = [];
         $bindIndex      = -1;
 
         foreach ($types as $name => $type) {
@@ -104,7 +104,7 @@ class SQLParserUtils
         }
 
         if (( ! $arrayPositions && $isPositional)) {
-            return array($query, $params, $types);
+            return [$query, $params, $types];
         }
 
         $paramPos = self::getPlaceholderPositions($query, $isPositional);
@@ -120,7 +120,7 @@ class SQLParserUtils
 
                 $needle    += $paramOffset;
                 $needlePos += $queryOffset;
-                $count      = count($params[$needle]);
+                $count      = is_countable($params[$needle]) ? count($params[$needle]) : 0;
 
                 $params = array_merge(
                     array_slice($params, 0, $needle),
@@ -132,7 +132,7 @@ class SQLParserUtils
                     array_slice($types, 0, $needle),
                     $count ?
                         array_fill(0, $count, $types[$needle] - Connection::ARRAY_PARAM_OFFSET) : // array needles are at PDO::PARAM_* + 100
-                        array(),
+                        [],
                     array_slice($types, $needle + 1)
                 );
 
@@ -143,15 +143,15 @@ class SQLParserUtils
                 $queryOffset += (strlen($expandStr) - 1);
             }
 
-            return array($query, $params, $types);
+            return [$query, $params, $types];
         }
 
         $queryOffset = 0;
-        $typesOrd    = array();
-        $paramsOrd   = array();
+        $typesOrd    = [];
+        $paramsOrd   = [];
 
         foreach ($paramPos as $pos => $paramName) {
-            $paramLen = strlen($paramName) + 1;
+            $paramLen = strlen((string) $paramName) + 1;
             $value    = static::extractParam($paramName, $params, true);
 
             if ( ! isset($arrayPositions[$paramName]) && ! isset($arrayPositions[':' . $paramName])) {
@@ -164,7 +164,7 @@ class SQLParserUtils
                 continue;
             }
 
-            $count      = count($value);
+            $count      = is_countable($value) ? count($value) : 0;
             $expandStr  = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : 'NULL';
 
             foreach ($value as $val) {
@@ -177,7 +177,7 @@ class SQLParserUtils
             $query        = substr($query, 0, $pos) . $expandStr . substr($query, ($pos + $paramLen));
         }
 
-        return array($query, $paramsOrd, $typesOrd);
+        return [$query, $paramsOrd, $typesOrd];
     }
 
     /**
@@ -210,7 +210,7 @@ class SQLParserUtils
      * @throws SQLParserUtilsException
      * @return mixed
      */
-    static private function extractParam($paramName, $paramsOrTypes, $isParam, $defaultValue = null)
+    static private function extractParam($paramName, $paramsOrTypes, $isParam, mixed $defaultValue = null)
     {
         if (array_key_exists($paramName, $paramsOrTypes)) {
             return $paramsOrTypes[$paramName];

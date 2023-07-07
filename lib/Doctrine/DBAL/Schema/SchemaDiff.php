@@ -38,45 +38,24 @@ class SchemaDiff
     public $fromSchema;
 
     /**
-     * All added tables.
-     *
-     * @var \Doctrine\DBAL\Schema\Table[]
+     * @var \Doctrine\DBAL\Schema\Sequence[]
      */
-    public $newTables = array();
-
-    /**
-     * All changed tables.
-     *
-     * @var \Doctrine\DBAL\Schema\TableDiff[]
-     */
-    public $changedTables = array();
-
-    /**
-     * All removed tables.
-     *
-     * @var \Doctrine\DBAL\Schema\Table[]
-     */
-    public $removedTables = array();
+    public $newSequences = [];
 
     /**
      * @var \Doctrine\DBAL\Schema\Sequence[]
      */
-    public $newSequences = array();
+    public $changedSequences = [];
 
     /**
      * @var \Doctrine\DBAL\Schema\Sequence[]
      */
-    public $changedSequences = array();
-
-    /**
-     * @var \Doctrine\DBAL\Schema\Sequence[]
-     */
-    public $removedSequences = array();
+    public $removedSequences = [];
 
     /**
      * @var \Doctrine\DBAL\Schema\ForeignKeyConstraint[]
      */
-    public $orphanedForeignKeys = array();
+    public $orphanedForeignKeys = [];
 
     /**
      * Constructs an SchemaDiff object.
@@ -86,11 +65,20 @@ class SchemaDiff
      * @param \Doctrine\DBAL\Schema\Table[]     $removedTables
      * @param \Doctrine\DBAL\Schema\Schema|null $fromSchema
      */
-    public function __construct($newTables = array(), $changedTables = array(), $removedTables = array(), Schema $fromSchema = null)
+    public function __construct(/**
+     * All added tables.
+     *
+     */
+    public $newTables = [], /**
+     * All changed tables.
+     *
+     */
+    public $changedTables = [], /**
+     * All removed tables.
+     *
+     */
+    public $removedTables = [], Schema $fromSchema = null)
     {
-        $this->newTables     = $newTables;
-        $this->changedTables = $changedTables;
-        $this->removedTables = $removedTables;
         $this->fromSchema    = $fromSchema;
     }
 
@@ -113,8 +101,6 @@ class SchemaDiff
     }
 
     /**
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
-     *
      * @return array
      */
     public function toSql(AbstractPlatform $platform)
@@ -123,14 +109,12 @@ class SchemaDiff
     }
 
     /**
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
      * @param boolean                                   $saveMode
-     *
      * @return array
      */
     protected function _toSql(AbstractPlatform $platform, $saveMode = false)
     {
-        $sql = array();
+        $sql = [];
 
         if ($platform->supportsForeignKeyConstraints() && $saveMode == false) {
             foreach ($this->orphanedForeignKeys as $orphanedForeignKey) {
@@ -154,7 +138,7 @@ class SchemaDiff
             }
         }
 
-        $foreignKeySql = array();
+        $foreignKeySql = [];
         foreach ($this->newTables as $table) {
             $sql = array_merge(
                 $sql,

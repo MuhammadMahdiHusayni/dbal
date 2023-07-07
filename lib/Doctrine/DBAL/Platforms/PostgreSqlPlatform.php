@@ -32,10 +32,7 @@ use Doctrine\DBAL\Schema\TableDiff;
  */
 class PostgreSqlPlatform extends AbstractPlatform
 {
-    /**
-     * @var bool
-     */
-    private $useBooleanTrueFalseStrings = true;
+    private bool $useBooleanTrueFalseStrings = true;
 
     /**
      * PostgreSQL has different behavior with some drivers
@@ -53,24 +50,7 @@ class PostgreSqlPlatform extends AbstractPlatform
     /**
      * @var array PostgreSQL booleans literals
      */
-    private $booleanLiterals = array(
-        'true'  => array(
-            't',
-            'true',
-            'y',
-            'yes',
-            'on',
-            '1'
-        ),
-        'false' => array(
-            'f',
-            'false',
-            'n',
-            'no',
-            'off',
-            '0'
-        )
-    );
+    private array $booleanLiterals = ['true'  => ['t', 'true', 'y', 'yes', 'on', '1'], 'false' => ['f', 'false', 'n', 'no', 'off', '0']];
 
     /**
      * {@inheritDoc}
@@ -318,8 +298,8 @@ class PostgreSqlPlatform extends AbstractPlatform
     private function getTableWhereClause($table, $classAlias = 'c', $namespaceAlias = 'n')
     {
         $whereClause = $namespaceAlias.".nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast') AND ";
-        if (strpos($table, ".") !== false) {
-            list($schema, $table) = explode(".", $table);
+        if (str_contains($table, ".")) {
+            [$schema, $table] = explode(".", $table);
             $schema = "'" . $schema . "'";
         } else {
             $schema = "ANY(string_to_array((select replace(replace(setting,'\"\$user\"',user),' ','') from pg_catalog.pg_settings where name = 'search_path'),','))";
@@ -409,9 +389,9 @@ class PostgreSqlPlatform extends AbstractPlatform
      */
     public function getAlterTableSQL(TableDiff $diff)
     {
-        $sql = array();
-        $commentsSQL = array();
-        $columnSql = array();
+        $sql = [];
+        $commentsSQL = [];
+        $columnSql = [];
 
         foreach ($diff->addedColumns as $column) {
             if ($this->onSchemaAlterTableAddColumn($column, $diff, $columnSql)) {
@@ -502,7 +482,7 @@ class PostgreSqlPlatform extends AbstractPlatform
             $sql[] = 'ALTER TABLE ' . $diff->name . ' RENAME COLUMN ' . $oldColumnName . ' TO ' . $column->getQuotedName($this);
         }
 
-        $tableSql = array();
+        $tableSql = [];
 
         if ( ! $this->onSchemaAlterTable($diff, $tableSql)) {
             if ($diff->newName !== false) {
@@ -567,8 +547,9 @@ class PostgreSqlPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function _getCreateTableSQL($tableName, array $columns, array $options = array())
+    protected function _getCreateTableSQL($tableName, array $columns, array $options = [])
     {
+        $sql = [];
         $queryFields = $this->getColumnDeclarationListSQL($columns);
 
         if (isset($options['primary']) && ! empty($options['primary'])) {
@@ -607,7 +588,7 @@ class PostgreSqlPlatform extends AbstractPlatform
      *
      * @return mixed
      */
-    private function convertSingleBooleanValue($value, $callback)
+    private function convertSingleBooleanValue(mixed $value, $callback)
     {
         if (null === $value) {
             return $callback(false);
@@ -647,7 +628,7 @@ class PostgreSqlPlatform extends AbstractPlatform
      *
      * @return mixed
      */
-    private function doConvertBooleans($item, $callback)
+    private function doConvertBooleans(mixed $item, $callback)
     {
         if (is_array($item)) {
             foreach ($item as $key => $value) {
@@ -673,9 +654,7 @@ class PostgreSqlPlatform extends AbstractPlatform
 
         return $this->doConvertBooleans(
             $item,
-            function ($boolean) {
-                return true === $boolean ? 'true' : 'false';
-            }
+            fn($boolean) => true === $boolean ? 'true' : 'false'
         );
     }
 
@@ -690,9 +669,7 @@ class PostgreSqlPlatform extends AbstractPlatform
 
         return $this->doConvertBooleans(
             $item,
-            function ($boolean) {
-                return (int) $boolean;
-            }
+            fn($boolean) => (int) $boolean
         );
     }
 
@@ -701,7 +678,7 @@ class PostgreSqlPlatform extends AbstractPlatform
      */
     public function convertFromBoolean($item)
     {
-        if (in_array(strtolower($item), $this->booleanLiterals['false'], true)) {
+        if (in_array(strtolower((string) $item), $this->booleanLiterals['false'], true)) {
             return false;
         }
 
@@ -892,46 +869,7 @@ class PostgreSqlPlatform extends AbstractPlatform
      */
     protected function initializeDoctrineTypeMappings()
     {
-        $this->doctrineTypeMapping = array(
-            'smallint'      => 'smallint',
-            'int2'          => 'smallint',
-            'serial'        => 'integer',
-            'serial4'       => 'integer',
-            'int'           => 'integer',
-            'int4'          => 'integer',
-            'integer'       => 'integer',
-            'bigserial'     => 'bigint',
-            'serial8'       => 'bigint',
-            'bigint'        => 'bigint',
-            'int8'          => 'bigint',
-            'bool'          => 'boolean',
-            'boolean'       => 'boolean',
-            'text'          => 'text',
-            'varchar'       => 'string',
-            'interval'      => 'string',
-            '_varchar'      => 'string',
-            'char'          => 'string',
-            'bpchar'        => 'string',
-            'inet'          => 'string',
-            'date'          => 'date',
-            'datetime'      => 'datetime',
-            'timestamp'     => 'datetime',
-            'timestamptz'   => 'datetimetz',
-            'time'          => 'time',
-            'timetz'        => 'time',
-            'float'         => 'float',
-            'float4'        => 'float',
-            'float8'        => 'float',
-            'double'        => 'float',
-            'double precision' => 'float',
-            'real'          => 'float',
-            'decimal'       => 'decimal',
-            'money'         => 'decimal',
-            'numeric'       => 'decimal',
-            'year'          => 'date',
-            'uuid'          => 'guid',
-            'bytea'         => 'blob',
-        );
+        $this->doctrineTypeMapping = ['smallint'      => 'smallint', 'int2'          => 'smallint', 'serial'        => 'integer', 'serial4'       => 'integer', 'int'           => 'integer', 'int4'          => 'integer', 'integer'       => 'integer', 'bigserial'     => 'bigint', 'serial8'       => 'bigint', 'bigint'        => 'bigint', 'int8'          => 'bigint', 'bool'          => 'boolean', 'boolean'       => 'boolean', 'text'          => 'text', 'varchar'       => 'string', 'interval'      => 'string', '_varchar'      => 'string', 'char'          => 'string', 'bpchar'        => 'string', 'inet'          => 'string', 'date'          => 'date', 'datetime'      => 'datetime', 'timestamp'     => 'datetime', 'timestamptz'   => 'datetimetz', 'time'          => 'time', 'timetz'        => 'time', 'float'         => 'float', 'float4'        => 'float', 'float8'        => 'float', 'double'        => 'float', 'double precision' => 'float', 'real'          => 'float', 'decimal'       => 'decimal', 'money'         => 'decimal', 'numeric'       => 'decimal', 'year'          => 'date', 'uuid'          => 'guid', 'bytea'         => 'blob'];
     }
 
     /**
@@ -947,7 +885,7 @@ class PostgreSqlPlatform extends AbstractPlatform
      */
     protected function getReservedKeywordsClass()
     {
-        return 'Doctrine\DBAL\Platforms\Keywords\PostgreSQLKeywords';
+        return \Doctrine\DBAL\Platforms\Keywords\PostgreSQLKeywords::class;
     }
 
     /**

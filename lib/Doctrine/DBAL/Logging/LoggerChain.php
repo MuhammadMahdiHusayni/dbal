@@ -31,12 +31,11 @@ class LoggerChain implements SQLLogger
     /**
      * @var \Doctrine\DBAL\Logging\SQLLogger[]
      */
-    private $loggers = array();
+    private array $loggers = [];
 
     /**
      * Adds a logger in the chain.
      *
-     * @param \Doctrine\DBAL\Logging\SQLLogger $logger
      *
      * @return void
      */

@@ -31,28 +31,20 @@ use Doctrine\DBAL\Connection;
  */
 class ExpressionBuilder
 {
-    const EQ  = '=';
-    const NEQ = '<>';
-    const LT  = '<';
-    const LTE = '<=';
-    const GT  = '>';
-    const GTE = '>=';
-
-    /**
-     * The DBAL Connection.
-     *
-     * @var \Doctrine\DBAL\Connection
-     */
-    private $connection;
+    final public const EQ  = '=';
+    final public const NEQ = '<>';
+    final public const LT  = '<';
+    final public const LTE = '<=';
+    final public const GT  = '>';
+    final public const GTE = '>=';
 
     /**
      * Initializes a new <tt>ExpressionBuilder</tt>.
      *
      * @param \Doctrine\DBAL\Connection $connection The DBAL Connection.
      */
-    public function __construct(Connection $connection)
+    public function __construct(private readonly Connection $connection)
     {
-        $this->connection = $connection;
     }
 
     /**
@@ -69,7 +61,7 @@ class ExpressionBuilder
      *
      * @return \Doctrine\DBAL\Query\Expression\CompositeExpression
      */
-    public function andX($x = null)
+    public function andX(mixed $x = null)
     {
         return new CompositeExpression(CompositeExpression::TYPE_AND, func_get_args());
     }
@@ -88,7 +80,7 @@ class ExpressionBuilder
      *
      * @return \Doctrine\DBAL\Query\Expression\CompositeExpression
      */
-    public function orX($x = null)
+    public function orX(mixed $x = null)
     {
         return new CompositeExpression(CompositeExpression::TYPE_OR, func_get_args());
     }
@@ -102,7 +94,7 @@ class ExpressionBuilder
      *
      * @return string
      */
-    public function comparison($x, $operator, $y)
+    public function comparison(mixed $x, $operator, mixed $y)
     {
         return $x . ' ' . $operator . ' ' . $y;
     }
@@ -122,7 +114,7 @@ class ExpressionBuilder
      *
      * @return string
      */
-    public function eq($x, $y)
+    public function eq(mixed $x, mixed $y)
     {
         return $this->comparison($x, self::EQ, $y);
     }
@@ -141,7 +133,7 @@ class ExpressionBuilder
      *
      * @return string
      */
-    public function neq($x, $y)
+    public function neq(mixed $x, mixed $y)
     {
         return $this->comparison($x, self::NEQ, $y);
     }
@@ -160,7 +152,7 @@ class ExpressionBuilder
      *
      * @return string
      */
-    public function lt($x, $y)
+    public function lt(mixed $x, mixed $y)
     {
         return $this->comparison($x, self::LT, $y);
     }
@@ -179,7 +171,7 @@ class ExpressionBuilder
      *
      * @return string
      */
-    public function lte($x, $y)
+    public function lte(mixed $x, mixed $y)
     {
         return $this->comparison($x, self::LTE, $y);
     }
@@ -198,7 +190,7 @@ class ExpressionBuilder
      *
      * @return string
      */
-    public function gt($x, $y)
+    public function gt(mixed $x, mixed $y)
     {
         return $this->comparison($x, self::GT, $y);
     }
@@ -217,7 +209,7 @@ class ExpressionBuilder
      *
      * @return string
      */
-    public function gte($x, $y)
+    public function gte(mixed $x, mixed $y)
     {
         return $this->comparison($x, self::GTE, $y);
     }
@@ -254,7 +246,7 @@ class ExpressionBuilder
      *
      * @return string
      */
-    public function like($x, $y)
+    public function like($x, mixed $y)
     {
         return $this->comparison($x, 'LIKE', $y);
     }
@@ -267,7 +259,7 @@ class ExpressionBuilder
      *
      * @return string
      */
-    public function notLike($x, $y)
+    public function notLike($x, mixed $y)
     {
         return $this->comparison($x, 'NOT LIKE', $y);
     }
@@ -306,7 +298,7 @@ class ExpressionBuilder
      *
      * @return string
      */
-    public function literal($input, $type = null)
+    public function literal(mixed $input, $type = null)
     {
         return $this->connection->quote($input, $type);
     }

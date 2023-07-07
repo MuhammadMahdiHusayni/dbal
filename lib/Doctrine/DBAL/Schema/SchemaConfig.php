@@ -46,7 +46,7 @@ class SchemaConfig
     /**
      * @var array
      */
-    protected $defaultTableOptions = array();
+    protected $defaultTableOptions = [];
 
     /**
      * @return boolean
@@ -118,8 +118,6 @@ class SchemaConfig
     }
 
     /**
-     * @param array $defaultTableOptions
-     *
      * @return void
      */
     public function setDefaultTableOptions(array $defaultTableOptions)

@@ -32,7 +32,6 @@ interface SchemaSynchronizer
     /**
      * Gets the SQL statements that can be executed to create the schema.
      *
-     * @param \Doctrine\DBAL\Schema\Schema $createSchema
      *
      * @return array
      */
@@ -41,9 +40,7 @@ interface SchemaSynchronizer
     /**
      * Gets the SQL Statements to update given schema with the underlying db.
      *
-     * @param \Doctrine\DBAL\Schema\Schema $toSchema
      * @param boolean                      $noDrops
-     *
      * @return array
      */
     function getUpdateSchema(Schema $toSchema, $noDrops = false);
@@ -51,7 +48,6 @@ interface SchemaSynchronizer
     /**
      * Gets the SQL Statements to drop the given schema from underlying db.
      *
-     * @param \Doctrine\DBAL\Schema\Schema $dropSchema
      *
      * @return array
      */
@@ -67,7 +63,6 @@ interface SchemaSynchronizer
     /**
      * Creates the Schema.
      *
-     * @param \Doctrine\DBAL\Schema\Schema $createSchema
      *
      * @return void
      */
@@ -76,9 +71,7 @@ interface SchemaSynchronizer
     /**
      * Updates the Schema to new schema version.
      *
-     * @param \Doctrine\DBAL\Schema\Schema $toSchema
      * @param boolean                      $noDrops
-     *
      * @return void
      */
     function updateSchema(Schema $toSchema, $noDrops = false);
@@ -86,7 +79,6 @@ interface SchemaSynchronizer
     /**
      * Drops the given database schema from the underlying db.
      *
-     * @param \Doctrine\DBAL\Schema\Schema $dropSchema
      *
      * @return void
      */

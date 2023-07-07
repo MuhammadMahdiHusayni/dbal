@@ -46,7 +46,7 @@ class JsonArrayType extends Type
             return null;
         }
 
-        return json_encode($value);
+        return json_encode($value, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -55,12 +55,12 @@ class JsonArrayType extends Type
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
         if ($value === null || $value === '') {
-            return array();
+            return [];
         }
 
         $value = (is_resource($value)) ? stream_get_contents($value) : $value;
 
-        return json_decode($value, true);
+        return json_decode((string) $value, true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**

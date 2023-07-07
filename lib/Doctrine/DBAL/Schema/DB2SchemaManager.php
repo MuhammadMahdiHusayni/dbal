@@ -62,7 +62,7 @@ class DB2SchemaManager extends AbstractSchemaManager
 
         $type = $this->_platform->getDoctrineTypeMapping($tableColumn['typename']);
 
-        switch (strtolower($tableColumn['typename'])) {
+        switch (strtolower((string) $tableColumn['typename'])) {
             case 'varchar':
                 $length = $tableColumn['length'];
                 $fixed = false;
@@ -82,16 +82,7 @@ class DB2SchemaManager extends AbstractSchemaManager
                 break;
         }
 
-        $options = array(
-            'length'        => $length,
-            'unsigned'      => (bool)$unsigned,
-            'fixed'         => (bool)$fixed,
-            'default'       => ($tableColumn['default'] == "NULL") ? null : $tableColumn['default'],
-            'notnull'       => (bool) ($tableColumn['nulls'] == 'N'),
-            'scale'         => null,
-            'precision'     => null,
-            'platformOptions' => array(),
-        );
+        $options = ['length'        => $length, 'unsigned'      => (bool)$unsigned, 'fixed'         => (bool)$fixed, 'default'       => ($tableColumn['default'] == "NULL") ? null : $tableColumn['default'], 'notnull'       => (bool) ($tableColumn['nulls'] == 'N'), 'scale'         => null, 'precision'     => null, 'platformOptions' => []];
 
         if ($scale !== null && $precision !== null) {
             $options['scale'] = $scale;
@@ -106,7 +97,7 @@ class DB2SchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableTablesList($tables)
     {
-        $tableNames = array();
+        $tableNames = [];
         foreach ($tables as $tableRow) {
             $tableRow = array_change_key_case($tableRow, \CASE_LOWER);
             $tableNames[] = $tableRow['name'];
@@ -122,20 +113,15 @@ class DB2SchemaManager extends AbstractSchemaManager
     {
         $eventManager = $this->_platform->getEventManager();
 
-        $indexes = array();
+        $indexes = [];
         foreach($tableIndexes as $indexKey => $data) {
             $data = array_change_key_case($data, \CASE_LOWER);
             $unique = ($data['uniquerule'] == "D") ? false : true;
             $primary = ($data['uniquerule'] == "P");
 
-            $indexName = strtolower($data['name']);
+            $indexName = strtolower((string) $data['name']);
 
-            $data = array(
-                'name' => $indexName,
-                'columns' => explode("+", ltrim($data['colnames'], '+')),
-                'unique' => $unique,
-                'primary' => $primary
-            );
+            $data = ['name' => $indexName, 'columns' => explode("+", ltrim((string) $data['colnames'], '+')), 'unique' => $unique, 'primary' => $primary];
 
             $index = null;
             $defaultPrevented = false;
@@ -175,10 +161,7 @@ class DB2SchemaManager extends AbstractSchemaManager
             $tableForeignKey['reftbname'],
             array_map('trim', (array)$tableForeignKey['pkcolnames']),
             $tableForeignKey['relname'],
-            array(
-                'onUpdate' => $tableForeignKey['updaterule'],
-                'onDelete' => $tableForeignKey['deleterule'],
-            )
+            ['onUpdate' => $tableForeignKey['updaterule'], 'onDelete' => $tableForeignKey['deleterule']]
         );
     }
 
@@ -205,8 +188,8 @@ class DB2SchemaManager extends AbstractSchemaManager
         // sadly this still segfaults on PDO_IBM, see http://pecl.php.net/bugs/bug.php?id=17199
         //$view['text'] = (is_resource($view['text']) ? stream_get_contents($view['text']) : $view['text']);
         if (!is_resource($view['text'])) {
-            $pos = strpos($view['text'], ' AS ');
-            $sql = substr($view['text'], $pos+4);
+            $pos = strpos((string) $view['text'], ' AS ');
+            $sql = substr((string) $view['text'], $pos+4);
         } else {
             $sql = '';
         }

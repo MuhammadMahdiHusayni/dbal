@@ -46,16 +46,14 @@ class Index extends AbstractAsset implements Constraint
      *
      * @var array
      */
-    protected $_flags = array();
+    protected $_flags = [];
 
     /**
      * @param string  $indexName
-     * @param array   $columns
      * @param boolean $isUnique
      * @param boolean $isPrimary
-     * @param array   $flags
      */
-    public function __construct($indexName, array $columns, $isUnique = false, $isPrimary = false, array $flags = array())
+    public function __construct($indexName, array $columns, $isUnique = false, $isPrimary = false, array $flags = [])
     {
         $isUnique = ($isPrimary)?true:$isUnique;
 
@@ -100,7 +98,7 @@ class Index extends AbstractAsset implements Constraint
      */
     public function getQuotedColumns(AbstractPlatform $platform)
     {
-        $columns = array();
+        $columns = [];
 
         foreach ($this->_columns as $column) {
             $columns[] = $column->getQuotedName($platform);
@@ -114,7 +112,7 @@ class Index extends AbstractAsset implements Constraint
      */
     public function getUnquotedColumns()
     {
-        return array_map(array($this, 'trimQuotes'), $this->getColumns());
+        return array_map($this->trimQuotes(...), $this->getColumns());
     }
 
     /**
@@ -160,7 +158,6 @@ class Index extends AbstractAsset implements Constraint
     /**
      * Checks if this index exactly spans the given column names in the correct order.
      *
-     * @param array $columnNames
      *
      * @return boolean
      */
@@ -171,7 +168,7 @@ class Index extends AbstractAsset implements Constraint
         $sameColumns     = true;
 
         for ($i = 0; $i < $numberOfColumns; $i++) {
-            if ( ! isset($columnNames[$i]) || $this->trimQuotes(strtolower($columns[$i])) !== $this->trimQuotes(strtolower($columnNames[$i]))) {
+            if ( ! isset($columnNames[$i]) || $this->trimQuotes(strtolower((string) $columns[$i])) !== $this->trimQuotes(strtolower((string) $columnNames[$i]))) {
                 $sameColumns = false;
             }
         }
@@ -182,7 +179,6 @@ class Index extends AbstractAsset implements Constraint
     /**
      * Checks if the other index already fulfills all the indexing and constraint needs of the current one.
      *
-     * @param \Doctrine\DBAL\Schema\Index $other
      *
      * @return boolean
      */
@@ -219,7 +215,6 @@ class Index extends AbstractAsset implements Constraint
     /**
      * Detects if the other index is a non-unique, non primary index that can be overwritten by this one.
      *
-     * @param \Doctrine\DBAL\Schema\Index $other
      *
      * @return boolean
      */

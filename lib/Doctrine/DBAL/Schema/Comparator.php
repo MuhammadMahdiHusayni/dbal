@@ -29,8 +29,6 @@ namespace Doctrine\DBAL\Schema;
 class Comparator
 {
     /**
-     * @param \Doctrine\DBAL\Schema\Schema $fromSchema
-     * @param \Doctrine\DBAL\Schema\Schema $toSchema
      *
      * @return \Doctrine\DBAL\Schema\SchemaDiff
      */
@@ -58,7 +56,7 @@ class Comparator
         $diff = new SchemaDiff();
         $diff->fromSchema = $fromSchema;
 
-        $foreignKeysToTable = array();
+        $foreignKeysToTable = [];
 
         foreach ( $toSchema->getTables() as $table ) {
             $tableName = $table->getShortestName($toSchema->getName());
@@ -85,7 +83,7 @@ class Comparator
             foreach ($table->getForeignKeys() as $foreignKey) {
                 $foreignTable = strtolower($foreignKey->getForeignTableName());
                 if (!isset($foreignKeysToTable[$foreignTable])) {
-                    $foreignKeysToTable[$foreignTable] = array();
+                    $foreignKeysToTable[$foreignTable] = [];
                 }
                 $foreignKeysToTable[$foreignTable][] = $foreignKey;
             }
@@ -153,8 +151,6 @@ class Comparator
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\Sequence $sequence1
-     * @param \Doctrine\DBAL\Schema\Sequence $sequence2
      *
      * @return boolean
      */
@@ -284,24 +280,23 @@ class Comparator
      * Try to find columns that only changed their name, rename operations maybe cheaper than add/drop
      * however ambiguities between different possibilities should not lead to renaming at all.
      *
-     * @param \Doctrine\DBAL\Schema\TableDiff $tableDifferences
      *
      * @return void
      */
     private function detectColumnRenamings(TableDiff $tableDifferences)
     {
-        $renameCandidates = array();
+        $renameCandidates = [];
         foreach ($tableDifferences->addedColumns as $addedColumnName => $addedColumn) {
             foreach ($tableDifferences->removedColumns as $removedColumn) {
                 if (count($this->diffColumn($addedColumn, $removedColumn)) == 0) {
-                    $renameCandidates[$addedColumn->getName()][] = array($removedColumn, $addedColumn, $addedColumnName);
+                    $renameCandidates[$addedColumn->getName()][] = [$removedColumn, $addedColumn, $addedColumnName];
                 }
             }
         }
 
         foreach ($renameCandidates as $candidateColumns) {
             if (count($candidateColumns) == 1) {
-                list($removedColumn, $addedColumn) = $candidateColumns[0];
+                [$removedColumn, $addedColumn] = $candidateColumns[0];
                 $removedColumnName = strtolower($removedColumn->getName());
                 $addedColumnName = strtolower($addedColumn->getName());
 
@@ -315,8 +310,6 @@ class Comparator
     }
 
     /**
-     * @param \Doctrine\DBAL\Schema\ForeignKeyConstraint $key1
-     * @param \Doctrine\DBAL\Schema\ForeignKeyConstraint $key2
      *
      * @return boolean
      */
@@ -358,7 +351,7 @@ class Comparator
      */
     public function diffColumn(Column $column1, Column $column2)
     {
-        $changedProperties = array();
+        $changedProperties = [];
         if ( $column1->getType() != $column2->getType() ) {
             $changedProperties[] = 'type';
         }
@@ -427,7 +420,7 @@ class Comparator
 
         $diffKeys = array_keys(array_diff_key($options1, $options2) + array_diff_key($options2, $options1));
 
-        $changedProperties = array_merge($changedProperties, $diffKeys);
+        $changedProperties = [...$changedProperties, ...$diffKeys];
 
         return $changedProperties;
     }

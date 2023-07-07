@@ -24,34 +24,16 @@ use PDO;
 
 class ArrayStatement implements \IteratorAggregate, ResultStatement
 {
-    /**
-     * @var array
-     */
-    private $data;
+    private int $columnCount = 0;
 
-    /**
-     * @var integer
-     */
-    private $columnCount = 0;
+    private int $num = 0;
 
-    /**
-     * @var integer
-     */
-    private $num = 0;
+    private int $defaultFetchMode = PDO::FETCH_BOTH;
 
-    /**
-     * @var integer
-     */
-    private $defaultFetchMode = PDO::FETCH_BOTH;
-
-    /**
-     * @param array $data
-     */
-    public function __construct(array $data)
+    public function __construct(private array $data)
     {
-        $this->data = $data;
         if (count($data)) {
-            $this->columnCount = count($data[0]);
+            $this->columnCount = is_countable($data[0]) ? count($data[0]) : 0;
         }
     }
 
@@ -124,7 +106,7 @@ class ArrayStatement implements \IteratorAggregate, ResultStatement
      */
     public function fetchAll($fetchMode = null)
     {
-        $rows = array();
+        $rows = [];
         while ($row = $this->fetch($fetchMode)) {
             $rows[] = $row;
         }

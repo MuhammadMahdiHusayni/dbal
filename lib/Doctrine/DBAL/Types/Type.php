@@ -31,59 +31,36 @@ use Doctrine\DBAL\DBALException;
  * @author Benjamin Eberlei <kontakt@beberlei.de>
  * @since  2.0
  */
-abstract class Type
+abstract class Type implements \Stringable
 {
-    const TARRAY = 'array';
-    const SIMPLE_ARRAY = 'simple_array';
-    const JSON_ARRAY = 'json_array';
-    const BIGINT = 'bigint';
-    const BOOLEAN = 'boolean';
-    const DATETIME = 'datetime';
-    const DATETIMETZ = 'datetimetz';
-    const DATE = 'date';
-    const TIME = 'time';
-    const DECIMAL = 'decimal';
-    const INTEGER = 'integer';
-    const OBJECT = 'object';
-    const SMALLINT = 'smallint';
-    const STRING = 'string';
-    const TEXT = 'text';
-    const BLOB = 'blob';
-    const FLOAT = 'float';
-    const GUID = 'guid';
+    public const TARRAY = 'array';
+    public const SIMPLE_ARRAY = 'simple_array';
+    public const JSON_ARRAY = 'json_array';
+    public const BIGINT = 'bigint';
+    public const BOOLEAN = 'boolean';
+    public const DATETIME = 'datetime';
+    public const DATETIMETZ = 'datetimetz';
+    public const DATE = 'date';
+    public const TIME = 'time';
+    public const DECIMAL = 'decimal';
+    public const INTEGER = 'integer';
+    public const OBJECT = 'object';
+    public const SMALLINT = 'smallint';
+    public const STRING = 'string';
+    public const TEXT = 'text';
+    public const BLOB = 'blob';
+    public const FLOAT = 'float';
+    public const GUID = 'guid';
 
     /**
      * Map of already instantiated type objects. One instance per type (flyweight).
-     *
-     * @var array
      */
-    private static $_typeObjects = array();
+    private static array $_typeObjects = [];
 
     /**
      * The map of supported doctrine mapping types.
-     *
-     * @var array
      */
-    private static $_typesMap = array(
-        self::TARRAY => 'Doctrine\DBAL\Types\ArrayType',
-        self::SIMPLE_ARRAY => 'Doctrine\DBAL\Types\SimpleArrayType',
-        self::JSON_ARRAY => 'Doctrine\DBAL\Types\JsonArrayType',
-        self::OBJECT => 'Doctrine\DBAL\Types\ObjectType',
-        self::BOOLEAN => 'Doctrine\DBAL\Types\BooleanType',
-        self::INTEGER => 'Doctrine\DBAL\Types\IntegerType',
-        self::SMALLINT => 'Doctrine\DBAL\Types\SmallIntType',
-        self::BIGINT => 'Doctrine\DBAL\Types\BigIntType',
-        self::STRING => 'Doctrine\DBAL\Types\StringType',
-        self::TEXT => 'Doctrine\DBAL\Types\TextType',
-        self::DATETIME => 'Doctrine\DBAL\Types\DateTimeType',
-        self::DATETIMETZ => 'Doctrine\DBAL\Types\DateTimeTzType',
-        self::DATE => 'Doctrine\DBAL\Types\DateType',
-        self::TIME => 'Doctrine\DBAL\Types\TimeType',
-        self::DECIMAL => 'Doctrine\DBAL\Types\DecimalType',
-        self::FLOAT => 'Doctrine\DBAL\Types\FloatType',
-        self::BLOB => 'Doctrine\DBAL\Types\BlobType',
-        self::GUID => 'Doctrine\DBAL\Types\GuidType',
-    );
+    private static array $_typesMap = [self::TARRAY => \Doctrine\DBAL\Types\ArrayType::class, self::SIMPLE_ARRAY => \Doctrine\DBAL\Types\SimpleArrayType::class, self::JSON_ARRAY => \Doctrine\DBAL\Types\JsonArrayType::class, self::OBJECT => \Doctrine\DBAL\Types\ObjectType::class, self::BOOLEAN => \Doctrine\DBAL\Types\BooleanType::class, self::INTEGER => \Doctrine\DBAL\Types\IntegerType::class, self::SMALLINT => \Doctrine\DBAL\Types\SmallIntType::class, self::BIGINT => \Doctrine\DBAL\Types\BigIntType::class, self::STRING => \Doctrine\DBAL\Types\StringType::class, self::TEXT => \Doctrine\DBAL\Types\TextType::class, self::DATETIME => \Doctrine\DBAL\Types\DateTimeType::class, self::DATETIMETZ => \Doctrine\DBAL\Types\DateTimeTzType::class, self::DATE => \Doctrine\DBAL\Types\DateType::class, self::TIME => \Doctrine\DBAL\Types\TimeType::class, self::DECIMAL => \Doctrine\DBAL\Types\DecimalType::class, self::FLOAT => \Doctrine\DBAL\Types\FloatType::class, self::BLOB => \Doctrine\DBAL\Types\BlobType::class, self::GUID => \Doctrine\DBAL\Types\GuidType::class];
 
     /**
      * Prevents instantiation and forces use of the factory method.
@@ -262,9 +239,9 @@ abstract class Type
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
-        $e = explode('\\', get_class($this));
+        $e = explode('\\', static::class);
 
         return str_replace('Type', '', end($e));
     }
@@ -288,7 +265,6 @@ abstract class Type
      * Modifies the SQL expression (identifier, parameter) to convert to a database value.
      *
      * @param string                                    $sqlExpr
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
      *
      * @return string
      */
@@ -313,13 +289,12 @@ abstract class Type
     /**
      * Gets an array of database types that map to this Doctrine type.
      *
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
      *
      * @return array
      */
     public function getMappedDatabaseTypes(AbstractPlatform $platform)
     {
-        return array();
+        return [];
     }
 
     /**

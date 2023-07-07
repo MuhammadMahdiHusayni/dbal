@@ -32,21 +32,13 @@ class DrizzleSchemaManager extends AbstractSchemaManager
     protected function _getPortableTableColumnDefinition($tableColumn)
     {
         $tableName = $tableColumn['COLUMN_NAME'];
-        $dbType = strtolower($tableColumn['DATA_TYPE']);
+        $dbType = strtolower((string) $tableColumn['DATA_TYPE']);
 
         $type = $this->_platform->getDoctrineTypeMapping($dbType);
         $type = $this->extractDoctrineTypeFromComment($tableColumn['COLUMN_COMMENT'], $type);
         $tableColumn['COLUMN_COMMENT'] = $this->removeDoctrineTypeFromComment($tableColumn['COLUMN_COMMENT'], $type);
 
-        $options = array(
-            'notnull' => !(bool)$tableColumn['IS_NULLABLE'],
-            'length' => (int)$tableColumn['CHARACTER_MAXIMUM_LENGTH'],
-            'default' => isset($tableColumn['COLUMN_DEFAULT']) ? $tableColumn['COLUMN_DEFAULT'] : null,
-            'autoincrement' => (bool)$tableColumn['IS_AUTO_INCREMENT'],
-            'scale' => (int)$tableColumn['NUMERIC_SCALE'],
-            'precision' => (int)$tableColumn['NUMERIC_PRECISION'],
-            'comment' => (isset($tableColumn['COLUMN_COMMENT']) ? $tableColumn['COLUMN_COMMENT'] : null),
-        );
+        $options = ['notnull' => !(bool)$tableColumn['IS_NULLABLE'], 'length' => (int)$tableColumn['CHARACTER_MAXIMUM_LENGTH'], 'default' => $tableColumn['COLUMN_DEFAULT'] ?? null, 'autoincrement' => (bool)$tableColumn['IS_AUTO_INCREMENT'], 'scale' => (int)$tableColumn['NUMERIC_SCALE'], 'precision' => (int)$tableColumn['NUMERIC_PRECISION'], 'comment' => ($tableColumn['COLUMN_COMMENT'] ?? null)];
 
         return new Column($tableName, \Doctrine\DBAL\Types\Type::getType($type), $options);
     }
@@ -72,13 +64,13 @@ class DrizzleSchemaManager extends AbstractSchemaManager
      */
     public function _getPortableTableForeignKeyDefinition($tableForeignKey)
     {
-        $columns = array();
-        foreach (explode(',', $tableForeignKey['CONSTRAINT_COLUMNS']) as $value) {
+        $columns = [];
+        foreach (explode(',', (string) $tableForeignKey['CONSTRAINT_COLUMNS']) as $value) {
             $columns[] = trim($value, ' `');
         }
 
-        $ref_columns = array();
-        foreach (explode(',', $tableForeignKey['REFERENCED_TABLE_COLUMNS']) as $value) {
+        $ref_columns = [];
+        foreach (explode(',', (string) $tableForeignKey['REFERENCED_TABLE_COLUMNS']) as $value) {
             $ref_columns[] = trim($value, ' `');
         }
 
@@ -87,10 +79,7 @@ class DrizzleSchemaManager extends AbstractSchemaManager
             $tableForeignKey['REFERENCED_TABLE_NAME'],
             $ref_columns,
             $tableForeignKey['CONSTRAINT_NAME'],
-            array(
-                'onUpdate' => $tableForeignKey['UPDATE_RULE'],
-                'onDelete' => $tableForeignKey['DELETE_RULE'],
-            )
+            ['onUpdate' => $tableForeignKey['UPDATE_RULE'], 'onDelete' => $tableForeignKey['DELETE_RULE']]
         );
     }
 
@@ -99,7 +88,7 @@ class DrizzleSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableTableIndexesList($tableIndexes, $tableName = null)
     {
-        $indexes = array();
+        $indexes = [];
         foreach ($tableIndexes as $k) {
             $k['primary'] = (boolean)$k['primary'];
             $indexes[] = $k;

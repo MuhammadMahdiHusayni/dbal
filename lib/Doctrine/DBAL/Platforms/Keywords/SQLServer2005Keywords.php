@@ -44,13 +44,6 @@ class SQLServer2005Keywords extends SQLServerKeywords
      */
     protected function getKeywords()
     {
-        return array_merge(array_diff(parent::getKeywords(), array('DUMMY')), array(
-            'EXTERNAL',
-            'PIVOT',
-            'REVERT',
-            'SECURITYAUDIT',
-            'TABLESAMPLE',
-            'UNPIVOT'
-        ));
+        return array_merge(array_diff(parent::getKeywords(), ['DUMMY']), ['EXTERNAL', 'PIVOT', 'REVERT', 'SECURITYAUDIT', 'TABLESAMPLE', 'UNPIVOT']);
     }
 }

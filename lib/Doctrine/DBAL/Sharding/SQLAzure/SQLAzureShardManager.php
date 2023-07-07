@@ -36,10 +36,7 @@ class SQLAzureShardManager implements ShardManager
      */
     private $federationName;
 
-    /**
-     * @var boolean
-     */
-    private $filteringEnabled;
+    private bool $filteringEnabled;
 
     /**
      * @var string
@@ -51,24 +48,13 @@ class SQLAzureShardManager implements ShardManager
      */
     private $distributionType;
 
-    /**
-     * @var \Doctrine\DBAL\Connection
-     */
-    private $conn;
+    private ?string $currentDistributionValue = null;
 
     /**
-     * @var string
-     */
-    private $currentDistributionValue;
-
-    /**
-     * @param \Doctrine\DBAL\Connection $conn
-     *
      * @throws \Doctrine\DBAL\Sharding\ShardingException
      */
-    public function __construct(Connection $conn)
+    public function __construct(private readonly Connection $conn)
     {
-        $this->conn = $conn;
         $params = $conn->getParams();
 
         if ( ! isset($params['sharding']['federationName'])) {
@@ -197,14 +183,14 @@ class SQLAzureShardManager implements ShardManager
      /**
       * {@inheritDoc}
       */
-    public function queryAll($sql, array $params = array(), array $types = array())
+    public function queryAll($sql, array $params = [], array $types = [])
     {
         $shards = $this->getShards();
         if (!$shards) {
             throw new \RuntimeException("No shards found for " . $this->federationName);
         }
 
-        $result = array();
+        $result = [];
         $oldDistribution = $this->getCurrentDistributionValue();
 
         foreach ($shards as $shard) {
@@ -226,11 +212,10 @@ class SQLAzureShardManager implements ShardManager
     /**
      * Splits Federation at a given distribution value.
      *
-     * @param mixed $splitDistributionValue
      *
      * @return void
      */
-    public function splitFederation($splitDistributionValue)
+    public function splitFederation(mixed $splitDistributionValue)
     {
         $type = Type::getType($this->distributionType);
 

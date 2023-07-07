@@ -34,32 +34,14 @@ use Doctrine\DBAL\Schema\SchemaException;
  */
 class DropSchemaSqlCollector extends AbstractVisitor
 {
-    /**
-     * @var \SplObjectStorage
-     */
-    private $constraints;
+    private array|\SplObjectStorage $constraints;
 
-    /**
-     * @var \SplObjectStorage
-     */
-    private $sequences;
+    private \SplObjectStorage $sequences;
 
-    /**
-     * @var \SplObjectStorage
-     */
-    private $tables;
+    private \SplObjectStorage $tables;
 
-    /**
-     * @var \Doctrine\DBAL\Platforms\AbstractPlatform
-     */
-    private $platform;
-
-    /**
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
-     */
-    public function __construct(AbstractPlatform $platform)
+    public function __construct(private readonly AbstractPlatform $platform)
     {
-        $this->platform = $platform;
         $this->clearQueries();
     }
 
@@ -107,7 +89,7 @@ class DropSchemaSqlCollector extends AbstractVisitor
      */
     public function getQueries()
     {
-        $sql = array();
+        $sql = [];
 
         foreach ($this->constraints as $fkConstraint) {
             $localTable = $this->constraints[$fkConstraint];

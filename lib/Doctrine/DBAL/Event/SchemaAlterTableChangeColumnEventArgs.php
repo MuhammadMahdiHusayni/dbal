@@ -32,36 +32,10 @@ use Doctrine\DBAL\Schema\TableDiff;
  */
 class SchemaAlterTableChangeColumnEventArgs extends SchemaEventArgs
 {
-    /**
-     * @var \Doctrine\DBAL\Schema\ColumnDiff
-     */
-    private $_columnDiff;
+    private array $_sql = [];
 
-    /**
-     * @var \Doctrine\DBAL\Schema\TableDiff
-     */
-    private $_tableDiff;
-
-    /**
-     * @var \Doctrine\DBAL\Platforms\AbstractPlatform
-     */
-    private $_platform;
-
-    /**
-     * @var array
-     */
-    private $_sql = array();
-
-    /**
-     * @param \Doctrine\DBAL\Schema\ColumnDiff          $columnDiff
-     * @param \Doctrine\DBAL\Schema\TableDiff           $tableDiff
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
-     */
-    public function __construct(ColumnDiff $columnDiff, TableDiff $tableDiff, AbstractPlatform $platform)
+    public function __construct(private readonly ColumnDiff $_columnDiff, private readonly TableDiff $_tableDiff, private readonly AbstractPlatform $_platform)
     {
-        $this->_columnDiff = $columnDiff;
-        $this->_tableDiff  = $tableDiff;
-        $this->_platform   = $platform;
     }
 
     /**

@@ -69,13 +69,9 @@ class OraclePlatform extends AbstractPlatform
      */
     public function getNowExpression($type = 'timestamp')
     {
-        switch ($type) {
-            case 'date':
-            case 'time':
-            case 'timestamp':
-            default:
-                return 'TO_CHAR(CURRENT_TIMESTAMP, \'YYYY-MM-DD HH24:MI:SS\')';
-        }
+        return match ($type) {
+            default => 'TO_CHAR(CURRENT_TIMESTAMP, \'YYYY-MM-DD HH24:MI:SS\')',
+        };
     }
 
     /**
@@ -205,17 +201,12 @@ class OraclePlatform extends AbstractPlatform
      */
     protected function _getTransactionIsolationLevelSQL($level)
     {
-        switch ($level) {
-            case \Doctrine\DBAL\Connection::TRANSACTION_READ_UNCOMMITTED:
-                return 'READ UNCOMMITTED';
-            case \Doctrine\DBAL\Connection::TRANSACTION_READ_COMMITTED:
-                return 'READ COMMITTED';
-            case \Doctrine\DBAL\Connection::TRANSACTION_REPEATABLE_READ:
-            case \Doctrine\DBAL\Connection::TRANSACTION_SERIALIZABLE:
-                return 'SERIALIZABLE';
-            default:
-                return parent::_getTransactionIsolationLevelSQL($level);
-        }
+        return match ($level) {
+            \Doctrine\DBAL\Connection::TRANSACTION_READ_UNCOMMITTED => 'READ UNCOMMITTED',
+            \Doctrine\DBAL\Connection::TRANSACTION_READ_COMMITTED => 'READ COMMITTED',
+            \Doctrine\DBAL\Connection::TRANSACTION_REPEATABLE_READ, \Doctrine\DBAL\Connection::TRANSACTION_SERIALIZABLE => 'SERIALIZABLE',
+            default => parent::_getTransactionIsolationLevelSQL($level),
+        };
     }
 
     /**
@@ -327,15 +318,15 @@ class OraclePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function _getCreateTableSQL($table, array $columns, array $options = array())
+    protected function _getCreateTableSQL($table, array $columns, array $options = [])
     {
-        $indexes = isset($options['indexes']) ? $options['indexes'] : array();
-        $options['indexes'] = array();
+        $indexes = $options['indexes'] ?? [];
+        $options['indexes'] = [];
         $sql = parent::_getCreateTableSQL($table, $columns, $options);
 
         foreach ($columns as $name => $column) {
             if (isset($column['sequence'])) {
-                $sql[] = $this->getCreateSequenceSQL($column['sequence'], 1);
+                $sql[] = $this->getCreateSequenceSQL($column['sequence']);
             }
 
             if (isset($column['autoincrement']) && $column['autoincrement'] ||
@@ -417,11 +408,11 @@ class OraclePlatform extends AbstractPlatform
         $table = strtoupper($table);
         $name = strtoupper($name);
 
-        $sql   = array();
+        $sql   = [];
 
         $indexName  = $table . '_AI_PK';
 
-        $idx = new Index($indexName, array($name), true, true);
+        $idx = new Index($indexName, [$name], true, true);
 
         $sql[] = 'DECLARE
   constraints_Count NUMBER;
@@ -469,6 +460,7 @@ END;';
      */
     public function getDropAutoincrementSql($table)
     {
+        $sql = [];
         $table = strtoupper($table);
         $trigger = $table . '_AI_PK';
 
@@ -588,21 +580,11 @@ LEFT JOIN user_cons_columns r_cols
     {
         $action = strtoupper($action);
 
-        switch ($action) {
-            case 'RESTRICT': // RESTRICT is not supported, therefore falling back to NO ACTION.
-            case 'NO ACTION':
-                // NO ACTION cannot be declared explicitly,
-                // therefore returning empty string to indicate to OMIT the referential clause.
-                return '';
-
-            case 'CASCADE':
-            case 'SET NULL':
-                return $action;
-
-            default:
-                // SET DEFAULT is not supported, throw exception instead.
-                throw new \InvalidArgumentException('Invalid foreign key action: ' . $action);
-        }
+        return match ($action) {
+            'RESTRICT', 'NO ACTION' => '',
+            'CASCADE', 'SET NULL' => $action,
+            default => throw new \InvalidArgumentException('Invalid foreign key action: ' . $action),
+        };
     }
 
     /**
@@ -618,11 +600,11 @@ LEFT JOIN user_cons_columns r_cols
      */
     public function getAlterTableSQL(TableDiff $diff)
     {
-        $sql = array();
-        $commentsSQL = array();
-        $columnSql = array();
+        $sql = [];
+        $commentsSQL = [];
+        $columnSql = [];
 
-        $fields = array();
+        $fields = [];
 
         foreach ($diff->addedColumns as $column) {
             if ($this->onSchemaAlterTableAddColumn($column, $diff, $columnSql)) {
@@ -639,7 +621,7 @@ LEFT JOIN user_cons_columns r_cols
             $sql[] = 'ALTER TABLE ' . $diff->name . ' ADD (' . implode(', ', $fields) . ')';
         }
 
-        $fields = array();
+        $fields = [];
         foreach ($diff->changedColumns as $columnDiff) {
             if ($this->onSchemaAlterTableChangeColumn($columnDiff, $diff, $columnSql)) {
                 continue;
@@ -651,7 +633,7 @@ LEFT JOIN user_cons_columns r_cols
             /**
              * Do not add query part if only comment has changed
              */
-            if ( ! ($columnHasChangedComment && count($columnDiff->changedProperties) === 1)) {
+            if ( ! ($columnHasChangedComment && (is_countable($columnDiff->changedProperties) ? count($columnDiff->changedProperties) : 0) === 1)) {
                 $columnInfo = $column->toArray();
 
                 if ( ! $columnDiff->hasChanged('notnull')) {
@@ -682,7 +664,7 @@ LEFT JOIN user_cons_columns r_cols
             $sql[] = 'ALTER TABLE ' . $diff->name . ' RENAME COLUMN ' . $oldColumnName .' TO ' . $column->getQuotedName($this);
         }
 
-        $fields = array();
+        $fields = [];
         foreach ($diff->removedColumns as $column) {
             if ($this->onSchemaAlterTableRemoveColumn($column, $diff, $columnSql)) {
                 continue;
@@ -695,7 +677,7 @@ LEFT JOIN user_cons_columns r_cols
             $sql[] = 'ALTER TABLE ' . $diff->name . ' DROP (' . implode(', ', $fields).')';
         }
 
-        $tableSql = array();
+        $tableSql = [];
 
         if ( ! $this->onSchemaAlterTable($diff, $tableSql)) {
             if ($diff->newName !== false) {
@@ -869,29 +851,7 @@ LEFT JOIN user_cons_columns r_cols
      */
     protected function initializeDoctrineTypeMappings()
     {
-        $this->doctrineTypeMapping = array(
-            'integer'           => 'integer',
-            'number'            => 'integer',
-            'pls_integer'       => 'boolean',
-            'binary_integer'    => 'boolean',
-            'varchar'           => 'string',
-            'varchar2'          => 'string',
-            'nvarchar2'         => 'string',
-            'char'              => 'string',
-            'nchar'             => 'string',
-            'date'              => 'datetime',
-            'timestamp'         => 'datetime',
-            'timestamptz'       => 'datetimetz',
-            'float'             => 'float',
-            'long'              => 'string',
-            'clob'              => 'text',
-            'nclob'             => 'text',
-            'raw'               => 'text',
-            'long raw'          => 'text',
-            'rowid'             => 'string',
-            'urowid'            => 'string',
-            'blob'              => 'blob',
-        );
+        $this->doctrineTypeMapping = ['integer'           => 'integer', 'number'            => 'integer', 'pls_integer'       => 'boolean', 'binary_integer'    => 'boolean', 'varchar'           => 'string', 'varchar2'          => 'string', 'nvarchar2'         => 'string', 'char'              => 'string', 'nchar'             => 'string', 'date'              => 'datetime', 'timestamp'         => 'datetime', 'timestamptz'       => 'datetimetz', 'float'             => 'float', 'long'              => 'string', 'clob'              => 'text', 'nclob'             => 'text', 'raw'               => 'text', 'long raw'          => 'text', 'rowid'             => 'string', 'urowid'            => 'string', 'blob'              => 'blob'];
     }
 
     /**
@@ -907,7 +867,7 @@ LEFT JOIN user_cons_columns r_cols
      */
     protected function getReservedKeywordsClass()
     {
-        return 'Doctrine\DBAL\Platforms\Keywords\OracleKeywords';
+        return \Doctrine\DBAL\Platforms\Keywords\OracleKeywords::class;
     }
 
     /**

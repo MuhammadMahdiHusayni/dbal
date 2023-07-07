@@ -51,43 +51,43 @@ class Connection implements DriverConnection
     /**
      * Constant for transaction isolation level READ UNCOMMITTED.
      */
-    const TRANSACTION_READ_UNCOMMITTED = 1;
+    final public const TRANSACTION_READ_UNCOMMITTED = 1;
 
     /**
      * Constant for transaction isolation level READ COMMITTED.
      */
-    const TRANSACTION_READ_COMMITTED = 2;
+    final public const TRANSACTION_READ_COMMITTED = 2;
 
     /**
      * Constant for transaction isolation level REPEATABLE READ.
      */
-    const TRANSACTION_REPEATABLE_READ = 3;
+    final public const TRANSACTION_REPEATABLE_READ = 3;
 
     /**
      * Constant for transaction isolation level SERIALIZABLE.
      */
-    const TRANSACTION_SERIALIZABLE = 4;
+    final public const TRANSACTION_SERIALIZABLE = 4;
 
     /**
      * Represents an array of ints to be expanded by Doctrine SQL parsing.
      *
      * @var integer
      */
-    const PARAM_INT_ARRAY = 101;
+    final public const PARAM_INT_ARRAY = 101;
 
     /**
      * Represents an array of strings to be expanded by Doctrine SQL parsing.
      *
      * @var integer
      */
-    const PARAM_STR_ARRAY = 102;
+    final public const PARAM_STR_ARRAY = 102;
 
     /**
      * Offset by which PARAM_* constants are detected as arrays of the param type.
      *
      * @var integer
      */
-    const ARRAY_PARAM_OFFSET = 100;
+    final public const ARRAY_PARAM_OFFSET = 100;
 
     /**
      * The wrapped driver connection.
@@ -113,24 +113,18 @@ class Connection implements DriverConnection
 
     /**
      * Whether or not a connection has been established.
-     *
-     * @var boolean
      */
-    private $_isConnected = false;
+    private bool $_isConnected = false;
 
     /**
      * The transaction nesting level.
-     *
-     * @var integer
      */
-    private $_transactionNestingLevel = 0;
+    private int $_transactionNestingLevel = 0;
 
     /**
      * The currently active transaction isolation level.
-     *
-     * @var integer
      */
-    private $_transactionIsolationLevel;
+    private int $_transactionIsolationLevel;
 
     /**
      * If nested transactions should use savepoints.
@@ -138,13 +132,6 @@ class Connection implements DriverConnection
      * @var integer
      */
     private $_nestTransactionsWithSavepoints;
-
-    /**
-     * The parameters used during creation of the Connection instance.
-     *
-     * @var array
-     */
-    private $_params = array();
 
     /**
      * The DatabasePlatform object that provides information about the
@@ -170,10 +157,8 @@ class Connection implements DriverConnection
 
     /**
      * Flag that indicates whether the current transaction is marked for rollback only.
-     *
-     * @var boolean
      */
-    private $_isRollbackOnly = false;
+    private bool $_isRollbackOnly = false;
 
     /**
      * @var integer
@@ -183,21 +168,20 @@ class Connection implements DriverConnection
     /**
      * Initializes a new instance of the Connection class.
      *
-     * @param array                              $params       The connection parameters.
+     * @param array $_params The connection parameters.
      * @param \Doctrine\DBAL\Driver              $driver       The driver to use.
      * @param \Doctrine\DBAL\Configuration|null  $config       The configuration, optional.
      * @param \Doctrine\Common\EventManager|null $eventManager The event manager, optional.
      *
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function __construct(array $params, Driver $driver, Configuration $config = null,
+    public function __construct(private readonly array $_params, Driver $driver, Configuration $config = null,
             EventManager $eventManager = null)
     {
         $this->_driver = $driver;
-        $this->_params = $params;
 
-        if (isset($params['pdo'])) {
-            $this->_conn = $params['pdo'];
+        if (isset($_params['pdo'])) {
+            $this->_conn = $_params['pdo'];
             $this->_isConnected = true;
         }
 
@@ -215,10 +199,10 @@ class Connection implements DriverConnection
 
         $this->_expr = new Query\Expression\ExpressionBuilder($this);
 
-        if ( ! isset($params['platform'])) {
+        if ( ! isset($_params['platform'])) {
             $this->_platform = $driver->getDatabasePlatform();
-        } else if ($params['platform'] instanceof Platforms\AbstractPlatform) {
-            $this->_platform = $params['platform'];
+        } else if ($_params['platform'] instanceof Platforms\AbstractPlatform) {
+            $this->_platform = $_params['platform'];
         } else {
             throw DBALException::invalidPlatformSpecified();
         }
@@ -255,7 +239,7 @@ class Connection implements DriverConnection
      */
     public function getHost()
     {
-        return isset($this->_params['host']) ? $this->_params['host'] : null;
+        return $this->_params['host'] ?? null;
     }
 
     /**
@@ -265,7 +249,7 @@ class Connection implements DriverConnection
      */
     public function getPort()
     {
-        return isset($this->_params['port']) ? $this->_params['port'] : null;
+        return $this->_params['port'] ?? null;
     }
 
     /**
@@ -275,7 +259,7 @@ class Connection implements DriverConnection
      */
     public function getUsername()
     {
-        return isset($this->_params['user']) ? $this->_params['user'] : null;
+        return $this->_params['user'] ?? null;
     }
 
     /**
@@ -285,7 +269,7 @@ class Connection implements DriverConnection
      */
     public function getPassword()
     {
-        return isset($this->_params['password']) ? $this->_params['password'] : null;
+        return $this->_params['password'] ?? null;
     }
 
     /**
@@ -348,11 +332,9 @@ class Connection implements DriverConnection
     {
         if ($this->_isConnected) return false;
 
-        $driverOptions = isset($this->_params['driverOptions']) ?
-                $this->_params['driverOptions'] : array();
-        $user = isset($this->_params['user']) ? $this->_params['user'] : null;
-        $password = isset($this->_params['password']) ?
-                $this->_params['password'] : null;
+        $driverOptions = $this->_params['driverOptions'] ?? [];
+        $user = $this->_params['user'] ?? null;
+        $password = $this->_params['password'] ?? null;
 
         $this->_conn = $this->_driver->connect($this->_params, $user, $password, $driverOptions);
         $this->_isConnected = true;
@@ -386,7 +368,7 @@ class Connection implements DriverConnection
      *
      * @return array
      */
-    public function fetchAssoc($statement, array $params = array())
+    public function fetchAssoc($statement, array $params = [])
     {
         return $this->executeQuery($statement, $params)->fetch(PDO::FETCH_ASSOC);
     }
@@ -400,7 +382,7 @@ class Connection implements DriverConnection
      *
      * @return array
      */
-    public function fetchArray($statement, array $params = array())
+    public function fetchArray($statement, array $params = [])
     {
         return $this->executeQuery($statement, $params)->fetch(PDO::FETCH_NUM);
     }
@@ -415,7 +397,7 @@ class Connection implements DriverConnection
      *
      * @return mixed
      */
-    public function fetchColumn($statement, array $params = array(), $colnum = 0)
+    public function fetchColumn($statement, array $params = [], $colnum = 0)
     {
         return $this->executeQuery($statement, $params)->fetchColumn($colnum);
     }
@@ -449,11 +431,11 @@ class Connection implements DriverConnection
      *
      * @return integer The number of affected rows.
      */
-    public function delete($tableName, array $identifier, array $types = array())
+    public function delete($tableName, array $identifier, array $types = [])
     {
         $this->connect();
 
-        $criteria = array();
+        $criteria = [];
 
         foreach (array_keys($identifier) as $columnName) {
             $criteria[] = $columnName . ' = ?';
@@ -514,10 +496,10 @@ class Connection implements DriverConnection
      *
      * @return integer The number of affected rows.
      */
-    public function update($tableName, array $data, array $identifier, array $types = array())
+    public function update($tableName, array $data, array $identifier, array $types = [])
     {
         $this->connect();
-        $set = array();
+        $set = [];
 
         foreach ($data as $columnName => $value) {
             $set[] = $columnName . ' = ?';
@@ -527,7 +509,7 @@ class Connection implements DriverConnection
             $types = $this->extractTypeValues(array_merge($data, $identifier), $types);
         }
 
-        $params = array_merge(array_values($data), array_values($identifier));
+        $params = [...array_values($data), ...array_values($identifier)];
 
         $sql  = 'UPDATE ' . $tableName . ' SET ' . implode(', ', $set)
                 . ' WHERE ' . implode(' = ? AND ', array_keys($identifier))
@@ -545,7 +527,7 @@ class Connection implements DriverConnection
      *
      * @return integer The number of affected rows.
      */
-    public function insert($tableName, array $data, array $types = array())
+    public function insert($tableName, array $data, array $types = [])
     {
         $this->connect();
 
@@ -564,19 +546,15 @@ class Connection implements DriverConnection
     /**
      * Extract ordered type list from two associate key lists of data and types.
      *
-     * @param array $data
-     * @param array $types
      *
      * @return array
      */
     private function extractTypeValues(array $data, array $types)
     {
-        $typeValues = array();
+        $typeValues = [];
 
         foreach ($data as $k => $_) {
-            $typeValues[] = isset($types[$k])
-                ? $types[$k]
-                : \PDO::PARAM_STR;
+            $typeValues[] = $types[$k] ?? \PDO::PARAM_STR;
         }
 
         return $typeValues;
@@ -613,7 +591,7 @@ class Connection implements DriverConnection
     {
         $this->connect();
 
-        list($value, $bindingType) = $this->getBindingInfo($input, $type);
+        [$value, $bindingType] = $this->getBindingInfo($input, $type);
         return $this->_conn->quote($value, $bindingType);
     }
 
@@ -626,7 +604,7 @@ class Connection implements DriverConnection
      *
      * @return array
      */
-    public function fetchAll($sql, array $params = array(), $types = array())
+    public function fetchAll($sql, array $params = [], $types = [])
     {
         return $this->executeQuery($sql, $params, $types)->fetchAll();
     }
@@ -672,7 +650,7 @@ class Connection implements DriverConnection
      *
      * @internal PERF: Directly prepares a driver statement, not a wrapper.
      */
-    public function executeQuery($query, array $params = array(), $types = array(), QueryCacheProfile $qcp = null)
+    public function executeQuery($query, array $params = [], $types = [], QueryCacheProfile $qcp = null)
     {
         if ($qcp !== null) {
             return $this->executeCacheQuery($query, $params, $types, $qcp);
@@ -687,7 +665,7 @@ class Connection implements DriverConnection
 
         try {
             if ($params) {
-                list($query, $params, $types) = SQLParserUtils::expandListParameters($query, $params, $types);
+                [$query, $params, $types] = SQLParserUtils::expandListParameters($query, $params, $types);
 
                 $stmt = $this->_conn->prepare($query);
                 if ($types) {
@@ -731,7 +709,7 @@ class Connection implements DriverConnection
             throw CacheException::noResultDriverConfigured();
         }
 
-        list($cacheKey, $realKey) = $qcp->generateCacheKeys($query, $params, $types);
+        [$cacheKey, $realKey] = $qcp->generateCacheKeys($query, $params, $types);
 
         // fetch the row pointers entry
         if ($data = $resultCache->fetch($cacheKey)) {
@@ -739,7 +717,7 @@ class Connection implements DriverConnection
             if (isset($data[$realKey])) {
                 $stmt = new ArrayStatement($data[$realKey]);
             } else if (array_key_exists($realKey, $data)) {
-                $stmt = new ArrayStatement(array());
+                $stmt = new ArrayStatement([]);
             }
         }
 
@@ -766,8 +744,8 @@ class Connection implements DriverConnection
      */
     public function project($query, array $params, Closure $function)
     {
-        $result = array();
-        $stmt = $this->executeQuery($query, $params ?: array());
+        $result = [];
+        $stmt = $this->executeQuery($query, $params ?: []);
 
         while ($row = $stmt->fetch()) {
             $result[] = $function($row);
@@ -797,17 +775,11 @@ class Connection implements DriverConnection
         }
 
         try {
-            switch (func_num_args()) {
-                case 1:
-                    $statement = $this->_conn->query($args[0]);
-                    break;
-                case 2:
-                    $statement = $this->_conn->query($args[0], $args[1]);
-                    break;
-                default:
-                    $statement = call_user_func_array(array($this->_conn, 'query'), $args);
-                    break;
-            }
+            $statement = match (func_num_args()) {
+                1 => $this->_conn->query($args[0]),
+                2 => $this->_conn->query($args[0], $args[1]),
+                default => call_user_func_array([$this->_conn, 'query'], $args),
+            };
         } catch (\Exception $ex) {
             throw DBALException::driverExceptionDuringQuery($ex, $args[0]);
         }
@@ -837,7 +809,7 @@ class Connection implements DriverConnection
      *
      * @internal PERF: Directly prepares a driver statement, not a wrapper.
      */
-    public function executeUpdate($query, array $params = array(), array $types = array())
+    public function executeUpdate($query, array $params = [], array $types = [])
     {
         $this->connect();
 
@@ -848,7 +820,7 @@ class Connection implements DriverConnection
 
         try {
             if ($params) {
-                list($query, $params, $types) = SQLParserUtils::expandListParameters($query, $params, $types);
+                [$query, $params, $types] = SQLParserUtils::expandListParameters($query, $params, $types);
 
                 $stmt = $this->_conn->prepare($query);
                 if ($types) {
@@ -1266,7 +1238,7 @@ class Connection implements DriverConnection
      *
      * @return mixed The converted value.
      */
-    public function convertToDatabaseValue($value, $type)
+    public function convertToDatabaseValue(mixed $value, $type)
     {
         return Type::getType($type)->convertToDatabaseValue($value, $this->_platform);
     }
@@ -1280,7 +1252,7 @@ class Connection implements DriverConnection
      *
      * @return mixed The converted type.
      */
-    public function convertToPHPValue($value, $type)
+    public function convertToPHPValue(mixed $value, $type)
     {
         return Type::getType($type)->convertToPHPValue($value, $this->_platform);
     }
@@ -1309,7 +1281,7 @@ class Connection implements DriverConnection
                 $typeIndex = $bindIndex + $typeOffset;
                 if (isset($types[$typeIndex])) {
                     $type = $types[$typeIndex];
-                    list($value, $bindingType) = $this->getBindingInfo($value, $type);
+                    [$value, $bindingType] = $this->getBindingInfo($value, $type);
                     $stmt->bindValue($bindIndex, $value, $bindingType);
                 } else {
                     $stmt->bindValue($bindIndex, $value);
@@ -1321,7 +1293,7 @@ class Connection implements DriverConnection
             foreach ($params as $name => $value) {
                 if (isset($types[$name])) {
                     $type = $types[$name];
-                    list($value, $bindingType) = $this->getBindingInfo($value, $type);
+                    [$value, $bindingType] = $this->getBindingInfo($value, $type);
                     $stmt->bindValue($name, $value, $bindingType);
                 } else {
                     $stmt->bindValue($name, $value);
@@ -1338,7 +1310,7 @@ class Connection implements DriverConnection
      *
      * @return array [0] => the (escaped) value, [1] => the binding type.
      */
-    private function getBindingInfo($value, $type)
+    private function getBindingInfo(mixed $value, mixed $type)
     {
         if (is_string($type)) {
             $type = Type::getType($type);
@@ -1350,7 +1322,7 @@ class Connection implements DriverConnection
             $bindingType = $type; // PDO::PARAM_* constants
         }
 
-        return array($value, $bindingType);
+        return [$value, $bindingType];
     }
 
     /**
@@ -1359,14 +1331,12 @@ class Connection implements DriverConnection
      * @internal This is a purely internal method. If you rely on this method, you are advised to
      *           copy/paste the code as this method may change, or be removed without prior notice.
      *
-     * @param array $params
-     * @param array $types
      *
      * @return array
      */
     public function resolveParams(array $params, array $types)
     {
-        $resolvedParams = array();
+        $resolvedParams = [];
 
         // Check whether parameters are positional or named. Mixing is not allowed, just like in PDO.
         if (is_int(key($params))) {
@@ -1377,7 +1347,7 @@ class Connection implements DriverConnection
                 $typeIndex = $bindIndex + $typeOffset;
                 if (isset($types[$typeIndex])) {
                     $type = $types[$typeIndex];
-                    list($value,) = $this->getBindingInfo($value, $type);
+                    [$value, ] = $this->getBindingInfo($value, $type);
                     $resolvedParams[$bindIndex] = $value;
                 } else {
                     $resolvedParams[$bindIndex] = $value;
@@ -1389,7 +1359,7 @@ class Connection implements DriverConnection
             foreach ($params as $name => $value) {
                 if (isset($types[$name])) {
                     $type = $types[$name];
-                    list($value,) = $this->getBindingInfo($value, $type);
+                    [$value, ] = $this->getBindingInfo($value, $type);
                     $resolvedParams[$name] = $value;
                 } else {
                     $resolvedParams[$name] = $value;

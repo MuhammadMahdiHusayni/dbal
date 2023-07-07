@@ -33,21 +33,13 @@ use Doctrine\Common\EventSubscriber;
 class SQLSessionInit implements EventSubscriber
 {
     /**
-     * @var string
-     */
-    protected $sql;
-
-    /**
      * @param string $sql
      */
-    public function __construct($sql)
+    public function __construct(protected $sql)
     {
-        $this->sql = $sql;
     }
 
     /**
-     * @param \Doctrine\DBAL\Event\ConnectionEventArgs $args
-     *
      * @return void
      */
     public function postConnect(ConnectionEventArgs $args)
@@ -61,6 +53,6 @@ class SQLSessionInit implements EventSubscriber
      */
     public function getSubscribedEvents()
     {
-        return array(Events::postConnect);
+        return [Events::postConnect];
     }
 }

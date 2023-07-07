@@ -36,16 +36,16 @@ final class Events
     {
     }
 
-    const postConnect = 'postConnect';
+    public const postConnect = 'postConnect';
 
-    const onSchemaCreateTable             = 'onSchemaCreateTable';
-    const onSchemaCreateTableColumn       = 'onSchemaCreateTableColumn';
-    const onSchemaDropTable               = 'onSchemaDropTable';
-    const onSchemaAlterTable              = 'onSchemaAlterTable';
-    const onSchemaAlterTableAddColumn     = 'onSchemaAlterTableAddColumn';
-    const onSchemaAlterTableRemoveColumn  = 'onSchemaAlterTableRemoveColumn';
-    const onSchemaAlterTableChangeColumn  = 'onSchemaAlterTableChangeColumn';
-    const onSchemaAlterTableRenameColumn  = 'onSchemaAlterTableRenameColumn';
-    const onSchemaColumnDefinition        = 'onSchemaColumnDefinition';
-    const onSchemaIndexDefinition         = 'onSchemaIndexDefinition';
+    public const onSchemaCreateTable             = 'onSchemaCreateTable';
+    public const onSchemaCreateTableColumn       = 'onSchemaCreateTableColumn';
+    public const onSchemaDropTable               = 'onSchemaDropTable';
+    public const onSchemaAlterTable              = 'onSchemaAlterTable';
+    public const onSchemaAlterTableAddColumn     = 'onSchemaAlterTableAddColumn';
+    public const onSchemaAlterTableRemoveColumn  = 'onSchemaAlterTableRemoveColumn';
+    public const onSchemaAlterTableChangeColumn  = 'onSchemaAlterTableChangeColumn';
+    public const onSchemaAlterTableRenameColumn  = 'onSchemaAlterTableRenameColumn';
+    public const onSchemaColumnDefinition        = 'onSchemaColumnDefinition';
+    public const onSchemaIndexDefinition         = 'onSchemaIndexDefinition';
 }

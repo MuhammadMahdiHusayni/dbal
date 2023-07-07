@@ -57,12 +57,12 @@ class SimpleArrayType extends Type
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
         if ($value === null) {
-            return array();
+            return [];
         }
 
         $value = (is_resource($value)) ? stream_get_contents($value) : $value;
 
-        return explode(',', $value);
+        return explode(',', (string) $value);
     }
 
     /**

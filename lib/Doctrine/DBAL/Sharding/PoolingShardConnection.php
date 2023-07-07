@@ -66,20 +66,11 @@ use Doctrine\DBAL\Sharding\ShardChoser\ShardChoser;
  */
 class PoolingShardConnection extends Connection
 {
-    /**
-     * @var array
-     */
-    private $activeConnections;
+    private ?array $activeConnections = null;
 
-    /**
-     * @var integer
-     */
-    private $activeShardId;
+    private ?int $activeShardId = null;
 
-    /**
-     * @var array
-     */
-    private $connections;
+    private array $connections;
 
     /**
      * @param array                         $params
@@ -179,12 +170,12 @@ class PoolingShardConnection extends Connection
     {
         $params = $this->getParams();
 
-        $driverOptions = isset($params['driverOptions']) ? $params['driverOptions'] : array();
+        $driverOptions = $params['driverOptions'] ?? [];
 
         $connectionParams = $this->connections[$shardId];
 
-        $user = isset($connectionParams['user']) ? $connectionParams['user'] : null;
-        $password = isset($connectionParams['password']) ? $connectionParams['password'] : null;
+        $user = $connectionParams['user'] ?? null;
+        $password = $connectionParams['password'] ?? null;
 
         return $this->_driver->connect($connectionParams, $user, $password, $driverOptions);
     }

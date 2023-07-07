@@ -63,7 +63,7 @@ abstract class AbstractAsset
             $this->_quoted = true;
             $name = $this->trimQuotes($name);
         }
-        if (strpos($name, ".") !== false) {
+        if (str_contains($name, ".")) {
             $parts = explode(".", $name);
             $this->_namespace = $parts[0];
             $name = $parts[1];
@@ -167,7 +167,7 @@ abstract class AbstractAsset
      */
     protected function trimQuotes($identifier)
     {
-        return str_replace(array('`', '"'), '', $identifier);
+        return str_replace(['`', '"'], '', $identifier);
     }
 
     /**
@@ -187,7 +187,6 @@ abstract class AbstractAsset
      * Gets the quoted representation of this asset but only if it was defined with one. Otherwise
      * return the plain unquoted value as inserted.
      *
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
      *
      * @return string
      */
@@ -217,9 +216,7 @@ abstract class AbstractAsset
      */
     protected function _generateIdentifierName($columnNames, $prefix='', $maxSize=30)
     {
-        $hash = implode("", array_map(function($column) {
-            return dechex(crc32($column));
-        }, $columnNames));
+        $hash = implode("", array_map(fn($column) => dechex(crc32($column)), $columnNames));
 
         return substr(strtoupper($prefix . "_" . $hash), 0, $maxSize);
     }

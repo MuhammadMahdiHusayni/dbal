@@ -154,20 +154,7 @@ class DrizzlePlatform extends AbstractPlatform
      */
     protected function initializeDoctrineTypeMappings()
     {
-        $this->doctrineTypeMapping = array(
-            'boolean'       => 'boolean',
-            'varchar'       => 'string',
-            'integer'       => 'integer',
-            'blob'          => 'text',
-            'decimal'       => 'decimal',
-            'datetime'      => 'datetime',
-            'date'          => 'date',
-            'time'          => 'time',
-            'text'          => 'text',
-            'timestamp'     => 'datetime',
-            'double'        => 'float',
-            'bigint'        => 'bigint',
-        );
+        $this->doctrineTypeMapping = ['boolean'       => 'boolean', 'varchar'       => 'string', 'integer'       => 'integer', 'blob'          => 'text', 'decimal'       => 'decimal', 'datetime'      => 'datetime', 'date'          => 'date', 'time'          => 'time', 'text'          => 'text', 'timestamp'     => 'datetime', 'double'        => 'float', 'bigint'        => 'bigint'];
     }
 
     /**
@@ -215,7 +202,7 @@ class DrizzlePlatform extends AbstractPlatform
      */
     protected function getReservedKeywordsClass()
     {
-        return 'Doctrine\DBAL\Platforms\Keywords\DrizzleKeywords';
+        return \Doctrine\DBAL\Platforms\Keywords\DrizzleKeywords::class;
     }
 
     /**
@@ -376,8 +363,8 @@ class DrizzlePlatform extends AbstractPlatform
      */
     public function getAlterTableSQL(TableDiff $diff)
     {
-        $columnSql = array();
-        $queryParts = array();
+        $columnSql = [];
+        $queryParts = [];
 
         if ($diff->newName !== false) {
             $queryParts[] =  'RENAME TO ' . $diff->newName;
@@ -425,8 +412,8 @@ class DrizzlePlatform extends AbstractPlatform
                     . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
         }
 
-        $sql = array();
-        $tableSql = array();
+        $sql = [];
+        $tableSql = [];
 
         if ( ! $this->onSchemaAlterTable($diff, $tableSql)) {
             if (count($queryParts) > 0) {

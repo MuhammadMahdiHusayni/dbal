@@ -40,62 +40,21 @@ use PDO;
 class ResultCacheStatement implements \IteratorAggregate, ResultStatement
 {
     /**
-     * @var \Doctrine\Common\Cache\Cache
-     */
-    private $resultCache;
-
-    /**
-     *
-     * @var string
-     */
-    private $cacheKey;
-
-    /**
-     * @var string
-     */
-    private $realKey;
-
-    /**
-     * @var integer
-     */
-    private $lifetime;
-
-    /**
-     * @var \Doctrine\DBAL\Driver\Statement
-     */
-    private $statement;
-
-    /**
      * Did we reach the end of the statement?
-     *
-     * @var boolean
      */
-    private $emptied = false;
+    private bool $emptied = false;
+
+    private ?array $data = null;
+
+    private int $defaultFetchMode = PDO::FETCH_BOTH;
 
     /**
-     * @var array
-     */
-    private $data;
-
-    /**
-     * @var integer
-     */
-    private $defaultFetchMode = PDO::FETCH_BOTH;
-
-    /**
-     * @param \Doctrine\DBAL\Driver\Statement $stmt
-     * @param \Doctrine\Common\Cache\Cache    $resultCache
      * @param string                          $cacheKey
      * @param string                          $realKey
      * @param integer                         $lifetime
      */
-    public function __construct(Statement $stmt, Cache $resultCache, $cacheKey, $realKey, $lifetime)
+    public function __construct(private readonly Statement $statement, private readonly Cache $resultCache, private $cacheKey, private $realKey, private $lifetime)
     {
-        $this->statement = $stmt;
-        $this->resultCache = $resultCache;
-        $this->cacheKey = $cacheKey;
-        $this->realKey = $realKey;
-        $this->lifetime = $lifetime;
     }
 
     /**
@@ -107,7 +66,7 @@ class ResultCacheStatement implements \IteratorAggregate, ResultStatement
         if ($this->emptied && $this->data !== null) {
             $data = $this->resultCache->fetch($this->cacheKey);
             if ( ! $data) {
-                $data = array();
+                $data = [];
             }
             $data[$this->realKey] = $this->data;
 
@@ -150,7 +109,7 @@ class ResultCacheStatement implements \IteratorAggregate, ResultStatement
     public function fetch($fetchMode = null)
     {
         if ($this->data === null) {
-            $this->data = array();
+            $this->data = [];
         }
 
         $row = $this->statement->fetch(PDO::FETCH_ASSOC);
@@ -181,7 +140,7 @@ class ResultCacheStatement implements \IteratorAggregate, ResultStatement
      */
     public function fetchAll($fetchMode = null)
     {
-        $rows = array();
+        $rows = [];
         while ($row = $this->fetch($fetchMode)) {
             $rows[] = $row;
         }

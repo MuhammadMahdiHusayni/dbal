@@ -31,45 +31,14 @@ use Doctrine\DBAL\Schema\Column;
  */
 class SchemaColumnDefinitionEventArgs extends SchemaEventArgs
 {
-    /**
-     * @var \Doctrine\DBAL\Schema\Column|null
-     */
-    private $_column = null;
+    private ?\Doctrine\DBAL\Schema\Column $_column = null;
 
     /**
-     * Raw column data as fetched from the database.
-     *
-     * @var array
+     * @param string $_table
+     * @param string $_database
      */
-    private $_tableColumn;
-
-    /**
-     * @var string
-     */
-    private $_table;
-
-    /**
-     * @var string
-     */
-    private $_database;
-
-    /**
-     * @var \Doctrine\DBAL\Connection
-     */
-    private $_connection;
-
-    /**
-     * @param array                     $tableColumn
-     * @param string                    $table
-     * @param string                    $database
-     * @param \Doctrine\DBAL\Connection $connection
-     */
-    public function __construct(array $tableColumn, $table, $database, Connection $connection)
+    public function __construct(private readonly array $_tableColumn, private $_table, private $_database, private readonly Connection $_connection)
     {
-        $this->_tableColumn = $tableColumn;
-        $this->_table       = $table;
-        $this->_database    = $database;
-        $this->_connection  = $connection;
     }
 
     /**

@@ -32,36 +32,10 @@ use Doctrine\DBAL\Schema\TableDiff;
  */
 class SchemaAlterTableRemoveColumnEventArgs extends SchemaEventArgs
 {
-    /**
-     * @var \Doctrine\DBAL\Schema\Column
-     */
-    private $_column;
+    private array $_sql = [];
 
-    /**
-     * @var \Doctrine\DBAL\Schema\TableDiff
-     */
-    private $_tableDiff;
-
-    /**
-     * @var \Doctrine\DBAL\Platforms\AbstractPlatform
-     */
-    private $_platform;
-
-    /**
-     * @var array
-     */
-    private $_sql = array();
-
-    /**
-     * @param \Doctrine\DBAL\Schema\Column              $column
-     * @param \Doctrine\DBAL\Schema\TableDiff           $tableDiff
-     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
-     */
-    public function __construct(Column $column, TableDiff $tableDiff, AbstractPlatform $platform)
+    public function __construct(private readonly Column $_column, private readonly TableDiff $_tableDiff, private readonly AbstractPlatform $_platform)
     {
-        $this->_column    = $column;
-        $this->_tableDiff = $tableDiff;
-        $this->_platform  = $platform;
     }
 
     /**
