@@ -69,7 +69,7 @@ interface Statement extends ResultStatement
      *
      * @return boolean TRUE on success or FALSE on failure.
      */
-    function bindParam($column, &$variable, $type = null, $length = null);
+    function bindParam(string|int $param, mixed &$var, int $type = PDO::PARAM_STR, int $maxLength = 0, mixed $driverOptions = null): bool;
 
     /**
      * Fetches the SQLSTATE associated with the last operation on the statement handle.

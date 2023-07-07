@@ -128,7 +128,7 @@ class Statement implements \IteratorAggregate, DriverStatement
      *
      * Binding a parameter by reference does not support DBAL mapping types.
      *
-     * @param string       $name   The name or position of the parameter.
+     * @param string       $param   The name or position of the parameter.
      * @param mixed        $var    The reference to the variable to bind.
      * @param integer      $type   The PDO binding type.
      * @param integer|null $length Must be specified when using an OUT bind
@@ -136,9 +136,9 @@ class Statement implements \IteratorAggregate, DriverStatement
      *
      * @return boolean TRUE on success, FALSE on failure.
      */
-    public function bindParam($name, &$var, $type = PDO::PARAM_STR, $length = null)
+    public function bindParam(string|int $param, mixed &$var, int $type = PDO::PARAM_STR, int $maxLength = 0, mixed $driverOptions = null): bool
     {
-        return $this->stmt->bindParam($name, $var, $type, $length);
+        return $this->stmt->bindParam($param, $var, $type, $maxLength, $driverOptions);
     }
 
     /**
