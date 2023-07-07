@@ -54,15 +54,33 @@ interface ResultStatement extends \Traversable
     public function setFetchMode(int $mode, mixed ...$args);
 
     /**
-     * @see Query::HYDRATE_* constants
+     * Returns the next row of a result set.
      *
-     * @param integer|null $fetchMode Controls how the next row will be returned to the caller.
-     *                                This value must be one of the Query::HYDRATE_* constants,
-     *                                defaulting to Query::HYDRATE_BOTH
+     * @deprecated Use fetchNumeric(), fetchAssociative() or fetchOne() instead.
      *
-     * @return mixed
+     * @param int|null $fetchMode         Controls how the next row will be returned to the caller.
+     *                                    The value must be one of the {@link FetchMode} constants,
+     *                                    defaulting to {@link FetchMode::MIXED}.
+     * @param int      $cursorOrientation For a ResultStatement object representing a scrollable cursor,
+     *                                    this value determines which row will be returned to the caller.
+     *                                    This value must be one of the \PDO::FETCH_ORI_* constants,
+     *                                    defaulting to \PDO::FETCH_ORI_NEXT. To request a scrollable
+     *                                    cursor for your ResultStatement object, you must set the \PDO::ATTR_CURSOR
+     *                                    attribute to \PDO::CURSOR_SCROLL when you prepare the SQL statement with
+     *                                    \PDO::prepare().
+     * @param int      $cursorOffset      For a ResultStatement object representing a scrollable cursor for which the
+     *                                    cursorOrientation parameter is set to \PDO::FETCH_ORI_ABS, this value
+     *                                    specifies the absolute number of the row in the result set that shall be
+     *                                    fetched.
+     *                                    For a ResultStatement object representing a scrollable cursor for which the
+     *                                    cursorOrientation parameter is set to \PDO::FETCH_ORI_REL, this value
+     *                                    specifies the row to fetch relative to the cursor position before
+     *                                    ResultStatement::fetch() was called.
+     *
+     * @return mixed The return value of this method on success depends on the fetch mode. In all cases, FALSE is
+     *               returned on failure.
      */
-    public function fetch($fetchMode = null);
+    public function fetch(int $fetchMode = PDO::FETCH_DEFAULT, int $cursorOrientation = PDO::FETCH_ORI_NEXT, int $cursorOffset = 0): mixed;
 
     /**
      * Returns an array containing all of the result set rows.

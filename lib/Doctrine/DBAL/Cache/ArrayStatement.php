@@ -97,26 +97,35 @@ class ArrayStatement implements \IteratorAggregate, ResultStatement
 
     /**
      * {@inheritdoc}
+     *
+     * @deprecated Use fetchNumeric(), fetchAssociative() or fetchOne() instead.
      */
-    public function fetch($fetchMode = null)
+    public function fetch($fetchMode = null, $cursorOrientation = PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
     {
-        if (isset($this->data[$this->num])) {
-            $row = $this->data[$this->num++];
-            $fetchMode = $fetchMode ?: $this->defaultFetchMode;
-            if ($fetchMode === PDO::FETCH_ASSOC) {
-                return $row;
-            } else if ($fetchMode === PDO::FETCH_NUM) {
-                return array_values($row);
-            } else if ($fetchMode === PDO::FETCH_BOTH) {
-                return array_merge($row, array_values($row));
-            } else if ($fetchMode === PDO::FETCH_COLUMN) {
-                return reset($row);
-            } else {
-                throw new \InvalidArgumentException("Invalid fetch-style given for fetching result.");
-            }
+        if (! isset($this->data[$this->num])) {
+            return false;
         }
 
-        return false;
+        $row       = $this->data[$this->num++];
+        $fetchMode = $fetchMode ?: $this->defaultFetchMode;
+
+        if ($fetchMode === FetchMode::ASSOCIATIVE) {
+            return $row;
+        }
+
+        if ($fetchMode === FetchMode::NUMERIC) {
+            return array_values($row);
+        }
+
+        if ($fetchMode === FetchMode::MIXED) {
+            return array_merge($row, array_values($row));
+        }
+
+        if ($fetchMode === FetchMode::COLUMN) {
+            return reset($row);
+        }
+
+        throw new InvalidArgumentException('Invalid fetch-style given for fetching result.');
     }
 
     /**
