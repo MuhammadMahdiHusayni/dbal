@@ -150,7 +150,7 @@ class Statement implements \IteratorAggregate, DriverStatement
      *
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function execute($params = null)
+    public function execute(?array $params = null): bool
     {
         if (is_array($params)) {
             $this->params = $params;

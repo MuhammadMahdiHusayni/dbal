@@ -104,7 +104,7 @@ interface Statement extends ResultStatement
      *
      * @return boolean TRUE on success or FALSE on failure.
      */
-    function execute($params = null);
+    function execute(?array $params = null): bool;
 
     /**
      * Returns the number of rows affected by the last DELETE, INSERT, or UPDATE statement
