@@ -44,6 +44,6 @@ class PDOStatement extends \PDOStatement implements Statement
         // parameters are optional, PHP will not let us remove it from this
         // declaration.
 
-        return parent::setFetchMode($mode, $args);
+        return parent::setFetchMode($mode);
     }
 }
