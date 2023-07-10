@@ -881,7 +881,7 @@ class Connection implements DriverConnection
      *
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function exec($statement)
+    public function exec(string $statement): int|false
     {
         $this->connect();
 

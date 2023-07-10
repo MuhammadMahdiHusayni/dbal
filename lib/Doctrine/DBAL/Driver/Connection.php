@@ -62,7 +62,7 @@ interface Connection
      *
      * @return integer
      */
-    function exec($statement);
+    function exec(string $statement): int|false;
 
     /**
      * Returns the ID of the last inserted row or sequence value.
