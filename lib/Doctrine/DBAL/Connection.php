@@ -949,7 +949,7 @@ class Connection implements DriverConnection
      *
      * @return string A string representation of the last inserted ID.
      */
-    public function lastInsertId($seqName = null)
+    public function lastInsertId(?string $name = null): string|false
     {
         $this->connect();
 

@@ -71,7 +71,7 @@ interface Connection
      *
      * @return string
      */
-    function lastInsertId($name = null);
+    function lastInsertId(?string $name = null): string|false;
 
     /**
      * Initiates a transaction.
