@@ -640,7 +640,7 @@ class Connection implements DriverConnection
      *
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function prepare($statement, array $options = []): \PDOStatement|false
+    public function prepare(string $statement, array $options = []): \PDOStatement|false
     {
         $this->connect();
 
