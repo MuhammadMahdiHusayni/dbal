@@ -609,7 +609,7 @@ class Connection implements DriverConnection
      *
      * @return string The quoted parameter.
      */
-    public function quote($input, $type = null)
+    public function quote(string $input, int $type = PDO::PARAM_STR): string|false
     {
         $this->connect();
 
