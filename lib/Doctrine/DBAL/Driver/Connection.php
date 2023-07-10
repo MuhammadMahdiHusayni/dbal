@@ -53,7 +53,7 @@ interface Connection
      *
      * @return string
      */
-    function quote(string $input, int $type = \PDO::PARAM_STR): string|false;
+    function quote(string $string, int $type = \PDO::PARAM_STR): string|false;
 
     /**
      * Executes an SQL statement and return the number of affected rows.
