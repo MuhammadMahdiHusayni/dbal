@@ -102,5 +102,5 @@ interface ResultStatement extends \Traversable
      *
      * @return string|boolean A single column in the next row of a result set, or FALSE if there are no more rows.
      */
-    public function fetchColumn($columnIndex = 0);
+    public function fetchColumn(int $columnIndex = 0): mixed;
 }

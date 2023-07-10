@@ -150,7 +150,7 @@ class ArrayStatement implements \IteratorAggregate, ResultStatement
     /**
      * {@inheritdoc}
      */
-    public function fetchColumn($columnIndex = 0)
+    public function fetchColumn(int $columnIndex = 0): mixed
     {
         $row = $this->fetch(PDO::FETCH_NUM);
         if (!isset($row[$columnIndex])) {
