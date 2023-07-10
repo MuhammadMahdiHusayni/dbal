@@ -43,7 +43,7 @@ interface Connection
      *
      * @return \Doctrine\DBAL\Driver\Statement
      */
-    function query();
+    function query(string $query, ?int $fetchMode = null, mixed ...$fetchModeArgs): \PDOStatement|false;
 
     /**
      * Quotes a string for use in a query.
