@@ -85,28 +85,13 @@ interface ResultStatement extends \Traversable
     /**
      * Returns an array containing all of the result set rows.
      *
-     * @deprecated Use fetchAllNumeric(), fetchAllAssociative() or fetchFirstColumn() instead.
+     * @param integer|null $fetchMode Controls how the next row will be returned to the caller.
+     *                                This value must be one of the Query::HYDRATE_* constants,
+     *                                defaulting to Query::HYDRATE_BOTH
      *
-     * @param int|null        $fetchMode     Controls how the next row will be returned to the caller.
-     *                                       The value must be one of the {@link FetchMode} constants,
-     *                                       defaulting to {@link FetchMode::MIXED}.
-     * @param int|string|null $fetchArgument This argument has a different meaning depending on the value
-     *                                       of the $fetchMode parameter:
-     *                                       * {@link FetchMode::COLUMN}:
-     *                                         Returns the indicated 0-indexed column.
-     *                                       * {@link FetchMode::CUSTOM_OBJECT}:
-     *                                         Returns instances of the specified class, mapping the columns of each row
-     *                                         to named properties in the class.
-     *                                       * {@link PDO::FETCH_FUNC}: Returns the results of calling
-     *                                         the specified function, using each row's
-     *                                         columns as parameters in the call.
-     * @param mixed[]|null    $ctorArgs      Controls how the next row will be returned to the caller.
-     *                                       The value must be one of the {@link FetchMode} constants,
-     *                                       defaulting to {@link FetchMode::MIXED}.
-     *
-     * @return mixed[]
+     * @return array
      */
-    public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null);
+    public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args): array;
 
     /**
      * Returns a single column from the next row of a result set or FALSE if there are no more rows.

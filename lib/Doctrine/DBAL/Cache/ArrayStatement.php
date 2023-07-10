@@ -130,16 +130,20 @@ class ArrayStatement implements \IteratorAggregate, ResultStatement
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated Use fetchAllNumeric(), fetchAllAssociative() or fetchFirstColumn() instead.
      */
-    public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null)
+    
+    public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args): array
     {
-        $rows = [];
-        while ($row = $this->fetch($fetchMode)) {
+        $rows = array();
+        while ($row = $this->fetch($mode)) {
             $rows[] = $row;
         }
 
+        if (count($args) === 0) {
+            return $rows;
+        }
+
+        // not sure what to do if got $args
         return $rows;
     }
 
